@@ -30,6 +30,7 @@ class CORnet(Model):
 # All code below this point:
 # Authors: qbilius, mschrimpf (github username)
 # Github repo: https://github.com/dicarlolab/CORnet
+# Paper: https://arxiv.org/pdf/1909.06161.pdf
 
 class Flatten(nn.Module):
     """

@@ -1,10 +1,12 @@
+# All code below this point:
+# Author Jongchan (GitHub username)
+# GitHub Repository: https://github.com/Jongchan/attention-module
+# Paper: https://openaccess.thecvf.com/content_ECCV_2018/papers/Sanghyun_Woo_Convolutional_Block_Attention_ECCV_2018_paper.pdf
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
-# Code from https://github.com/Jongchan/attention-module
-# Paper: https://openaccess.thecvf.com/content_ECCV_2018/papers/Sanghyun_Woo_Convolutional_Block_Attention_ECCV_2018_paper.pdf
 
 class BasicConv(nn.Module):
     def __init__(self, in_planes, out_planes, kernel_size, stride=1, padding=0, dilation=1, groups=1, relu=True,

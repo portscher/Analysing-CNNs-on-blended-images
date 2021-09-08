@@ -7,6 +7,11 @@ from torch.utils.data import Dataset
 mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
+"""
+Creates a dataset (training, validation or test) when passed a CSV file containing the names of all desired images and
+ he path to a folder containing these images
+"""
+
 
 class ImageDataset(Dataset):
     def __init__(self, csv, directory, set_type, img_size=224):
@@ -52,5 +57,3 @@ class ImageDataset(Dataset):
             'image': torch.as_tensor(image, dtype=torch.float32),
             'label': torch.as_tensor(targets, dtype=torch.float32)
         }
-
-

@@ -4,7 +4,12 @@ import pandas as pd
 from sklearn.utils import shuffle
 import numpy as np
 
+"""
+Script for generating a CSV file from a folder of images.
+Each image name must contain the name of all relevant object classes depicted on the image.
 
+Example: a blended image of a dog could be named dog_123.jpg
+"""
 def generate_label_csv(folder, class_names, file_name):
     files = [e for e in os.listdir(folder)]
     df = pd.DataFrame({'image': files})
@@ -29,7 +34,6 @@ if args.blended:
 else:
     base = '../reg_dataset'
 
-# generate_label_csv(f'{base}/', classes, '../csv/all_labels.csv')
-# generate_label_csv(f'{base}/val/', classes, '../csv/bl_val.csv')
-# generate_label_csv(f'{base}/train/', classes, '../csv/bl_train.csv')
-generate_label_csv(f'../blended_test/', classes, '../csv/bl_test_labels.csv')
+generate_label_csv(f'{base}/', classes, '../csv/all_labels.csv')
+generate_label_csv(f'{base}/val/', classes, '../csv/val.csv')
+generate_label_csv(f'{base}/train/', classes, '../csv/train.csv')

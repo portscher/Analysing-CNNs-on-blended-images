@@ -3,7 +3,7 @@ import os
 import torch
 
 from .model import Model
-from .resnet_att import ResidualNet
+from .resnet18_cbam_definition import ResidualNet
 
 
 class ResNet18CBAM(Model):

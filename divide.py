@@ -1,3 +1,6 @@
+"""
+Script to divide the set of images into training (75%) and validation sets (25%)
+"""
 import pandas as pd
 
 df_all = pd.read_csv("../csv/all_labels.csv")

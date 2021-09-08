@@ -30,6 +30,10 @@ class ViT(Model):
         return model
 
 
+# All code below this point:
+# Author: rwrightman
+# Repository: https://github.com/rwightman/pytorch-image-models
+
 def split_model_name(model_name):
     model_split = model_name.split(':', 1)
     if len(model_split) == 1:

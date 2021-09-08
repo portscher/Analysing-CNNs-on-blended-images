@@ -1,3 +1,7 @@
+# All code below this point:
+# Author: rwrightman
+# Repository: https://github.com/rwightman/pytorch-image-models
+
 """ Vision Transformer (ViT) in PyTorch
 A PyTorch implement of Vision Transformers as described in:
 'An Image Is Worth 16 x 16 Words: Transformers for Image Recognition at Scale'

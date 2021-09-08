@@ -2,6 +2,10 @@ import os
 
 import torch
 
+"""
+Interface class for all models
+"""
+
 
 class Model:
 

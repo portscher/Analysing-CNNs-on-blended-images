@@ -1,3 +1,8 @@
+# All code below this point:
+# Author: martinger (github username)
+# GitHub Repository: https://github.com/MartinGer/Attention-Augmented-Convolutional-Networks
+# Paper: https://arxiv.org/pdf/1904.09925.pdf
+
 import torch
 from torch import Tensor
 import torch.nn as nn

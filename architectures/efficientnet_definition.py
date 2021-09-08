@@ -1,15 +1,17 @@
-"""efficientnet_definition.py - Model and module class for EfficientNet.
-   They are built to mirror those in the official TensorFlow implementation.
-"""
-
+# All code below this point:
 # Author: lukemelas (github username)
 # Github repo: https://github.com/lukemelas/EfficientNet-PyTorch
 # With adjustments and added comments by workingcoder (github username).
 
+"""efficientnet_definition.py - Model and module class for EfficientNet.
+   They are built to mirror those in the official TensorFlow implementation.
+"""
+
 import torch
 from torch import nn
 from torch.nn import functional as F
-from .utils import (
+
+from .efficientnet_utils import (
     round_filters,
     round_repeats,
     drop_connect,
@@ -21,7 +23,6 @@ from .utils import (
     MemoryEfficientSwish,
     calculate_output_image_size
 )
-
 
 VALID_MODELS = (
     'efficientnet-ap', 'efficientnet-b0', 'efficientnet-b1', 'efficientnet-b2', 'efficientnet-b3',
@@ -37,8 +38,8 @@ class MBConvBlock(nn.Module):
     """Mobile Inverted Residual Bottleneck Block.
 
     Args:
-        block_args (namedtuple): BlockArgs, defined in utils.py.
-        global_params (namedtuple): GlobalParam, defined in utils.py.
+        block_args (namedtuple): BlockArgs, defined in efficientnet_utils.py.
+        global_params (namedtuple): GlobalParam, defined in efficientnet_utils.py.
         image_size (tuple or list): [image_height, image_width].
 
     References:
@@ -50,7 +51,7 @@ class MBConvBlock(nn.Module):
     def __init__(self, block_args, global_params, image_size=None):
         super().__init__()
         self._block_args = block_args
-        self._bn_mom = 1 - global_params.batch_norm_momentum # pytorch's difference from tensorflow
+        self._bn_mom = 1 - global_params.batch_norm_momentum  # pytorch's difference from tensorflow
         self._bn_eps = global_params.batch_norm_epsilon
         self.has_se = (self._block_args.se_ratio is not None) and (0 < self._block_args.se_ratio <= 1)
         self.id_skip = block_args.id_skip  # whether to use skip connection and drop connect
@@ -252,12 +253,12 @@ class EfficientNet(nn.Module):
                 drop_connect_rate *= float(idx) / len(self._blocks)  # scale drop connect_rate
             x = block(x, drop_connect_rate=drop_connect_rate)
             if prev_x.size(2) > x.size(2):
-                endpoints['reduction_{}'.format(len(endpoints)+1)] = prev_x
+                endpoints['reduction_{}'.format(len(endpoints) + 1)] = prev_x
             prev_x = x
 
         # Head
         x = self._swish(self._bn1(self._conv_head(x)))
-        endpoints['reduction_{}'.format(len(endpoints)+1)] = x
+        endpoints['reduction_{}'.format(len(endpoints) + 1)] = x
 
         return endpoints
 
@@ -278,7 +279,7 @@ class EfficientNet(nn.Module):
         for idx, block in enumerate(self._blocks):
             drop_connect_rate = self._global_params.drop_connect_rate
             if drop_connect_rate:
-                drop_connect_rate *= float(idx) / len(self._blocks) # scale drop connect_rate
+                drop_connect_rate *= float(idx) / len(self._blocks)  # scale drop connect_rate
             x = block(x, drop_connect_rate=drop_connect_rate)
 
         # Head
@@ -361,7 +362,8 @@ class EfficientNet(nn.Module):
             A pretrained efficientnet model.
         """
         model = cls.from_name(model_name, num_classes=num_classes, **override_params)
-        load_pretrained_weights(model, model_name, weights_path=weights_path, load_fc=(num_classes == 1000), advprop=advprop)
+        load_pretrained_weights(model, model_name, weights_path=weights_path, load_fc=(num_classes == 1000),
+                                advprop=advprop)
         model._change_in_channels(in_channels)
         return model
 

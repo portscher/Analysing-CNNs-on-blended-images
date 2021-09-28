@@ -21,10 +21,10 @@ class AACN_Layer(nn.Module):
 
         self.padding = (self.kernel_size - 1) // 2
 
-        self.conv_out = nn.Conv2d(self.in_channels, self.out_channels - self.dv, kernel_size=self.kernel_size,
-                                  padding=self.padding).to(device)
-        self.kqv_conv = nn.Conv2d(self.in_channels, 2 * self.dk + self.dv, kernel_size=1)
-        self.attn_out = nn.Conv2d(self.dv, self.dv, 1).to(device)
+        self.conv_out = nn.Conv2d(self.in_channels, self.out_channels - self.dv,
+                                  kernel_size=(self.kernel_size, self.kernel_size), padding=self.padding).to(device)
+        self.kqv_conv = nn.Conv2d(self.in_channels, 2 * self.dk + self.dv, kernel_size=(1, 1))
+        self.attn_out = nn.Conv2d(self.dv, self.dv, (1, 1)).to(device)
 
         # Positional encodings
         self.rel_encoding_h = nn.Parameter(
@@ -42,7 +42,7 @@ class AACN_Layer(nn.Module):
         batch_size, _, height, width = x.size()
         dkh = self.dk // self.num_heads
         dvh = self.dv // self.num_heads
-        flatten_hw = lambda x, depth: torch.reshape(x, (batch_size, self.num_heads, height * width, depth))
+        flatten_hw = lambda e, depth: torch.reshape(e, (batch_size, self.num_heads, height * width, depth))
 
         # Compute q, k, v
         kqv = self.kqv_conv(x)

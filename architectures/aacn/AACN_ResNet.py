@@ -1,24 +1,23 @@
-import torch
-from torch import Tensor
-import torch.nn as nn
 from typing import Type, Any, Callable, Union, List, Optional
+
+import torch
+import torch.nn as nn
+from torch import Tensor
 
 from .AACN_Layer import AACN_Layer
 
-__all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
-           'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
-           'wide_resnet50_2', 'wide_resnet101_2']
+__all__ = ['ResNet', 'resnet18', 'resnet50']
 
 
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
     """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, groups=groups, bias=False, dilation=dilation)
+    return nn.Conv2d(in_planes, out_planes, kernel_size=(3, 3), stride=(stride, stride),
+                     padding=dilation, groups=groups, bias=False, dilation=(dilation, dilation))
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> nn.Conv2d:
     """1x1 convolution"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
+    return nn.Conv2d(in_planes, out_planes, kernel_size=(1, 1), stride=(stride, stride), bias=False)
 
 
 class BasicBlock(nn.Module):
@@ -56,8 +55,8 @@ class BasicBlock(nn.Module):
             self.conv2 = conv3x3(planes, planes)
         else:
             width = int(planes * (base_width / 64.)) * groups
-            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3, num_heads=num_heads,
-                                    image_size=image_size, inference=inference)
+            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3,
+                                    num_heads=num_heads, image_size=image_size, inference=inference)
         self.bn2 = norm_layer(planes)
         self.downsample = downsample
         self.stride = stride
@@ -117,7 +116,8 @@ class Bottleneck(nn.Module):
         if not attention:
             self.conv2 = conv3x3(planes, planes)
         else:
-            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3, num_heads=num_heads,
+            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3,
+                                    num_heads=num_heads,
                                     image_size=image_size, inference=inference)
         self.bn2 = norm_layer(width)
         self.conv3 = conv1x1(width, planes * self.expansion)
@@ -183,7 +183,7 @@ class ResNet(nn.Module):
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
         self.groups = groups
         self.base_width = width_per_group
-        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=(7, 7), stride=(2, 2), padding=3,
                                bias=False)
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)

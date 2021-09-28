@@ -1,1 +1,47 @@
-# thesis
+# Analysing CNNs on blended images
+
+This code is part of my Bachelor's Thesis at the University of Innsbruck.
+
+## Abstract
+
+In neuroscience, blended images have oftentimes been used to examine the way in which attention mechanisms in the human brain work. They are particularly suited for experiments in this research area, as a subject needs to focus on particular features on an image in order to be able to classify the superimposed objects.
+Since there are many parallels between the human visual system and Convolutional Neural Networks -- such as the hierarchical structure where different levels of abstraction are processed on different network layers -- we examine, how CNNs perform on this task.
+In this paper, we evaluate the performance of selected CNN architectures (ResNet18, ResNet50, EfficientNet B0, CORnet-Z, CORnet-S and Inception V3) as well as a Vision Transformer on the classification of objects in blended images. 
+We first trained them with regular, non-blended images to see how well the networks can abstract to classifying blended images. 
+Second, we trained them with blended images to find out how their performance changes when they are primed for this specific use case.
+Since humans solve this task by applying selective attention, we also measured the impact of two different attention mechanisms: the Convolutional Block Attention Module (CBAM) and the Attention Augmented Convolutional Network (AACN), using multi-headed self-attention. 
+Since the task can rather easily be solved by humans we examined whether a correlation between the similarity of a network architecture's structure to the human visual system and its ability to correctly classify objects on blended images could be found. 
+
+## Data
+
+The corresponding dataset (including csv-files) can be found at https://www.kaggle.com/andreaport/blendeduibk
+
+## Usage
+
+Folder structure:
+ 
+``` 
+main folder
+│   README.md
+└─── code
+│   │   main.py
+│   │   predict.py
+|   |   ...
+│   │
+│   └───architectures
+│       │   ...
+│   
+└─── blended_dataset
+└─── blended_test
+└─── reg_dataset
+└─── reg_test
+└─── csv
+    │   bl_test_labels.csv
+    │   teset_labels.csv
+    └───blended
+    |      train.csv
+    |      val.csv
+    └───reg
+           train.csv
+           val.csv        
+```

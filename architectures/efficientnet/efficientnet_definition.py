@@ -4,13 +4,11 @@
 
 # Author: lukemelas (github username)
 # Github repo: https://github.com/lukemelas/EfficientNet-PyTorch
-# With adjustments and added comments by workingcoder (github username).
 
 import torch
 from torch import nn
 from torch.nn import functional as F
 
-from architectures.aacn import AACN_Layer
 from architectures.efficientnet.utils import (
     round_filters,
     round_repeats,
@@ -69,12 +67,9 @@ class MBConvBlock(nn.Module):
         k = self._block_args.kernel_size
         s = self._block_args.stride
         Conv2d = get_same_padding_conv2d(image_size=image_size)
-        # print(f'oup: {oup}, image_size: {image_size}')
-        self._depthwise_conv = AACN_Layer(in_channels=oup, out_channels=oup, dk=40, dv=4, kernel_size=k,
-                                          num_heads=4, image_size=image_size[0], inference=False)
 
-        #self._depthwise_conv = Conv2d(in_channels=oup, out_channels=oup, groups=oup,  # groups makes it depth wise
-        #                              kernel_size=k, stride=s, bias=False)
+        self._depthwise_conv = Conv2d(in_channels=oup, out_channels=oup, groups=oup,  # groups makes it depth wise
+                                      kernel_size=k, stride=s, bias=False)
         self._bn1 = nn.BatchNorm2d(num_features=oup, momentum=self._bn_mom, eps=self._bn_eps)
         image_size = calculate_output_image_size(image_size, s)
         # print(f'Output img size: {image_size}')
@@ -163,8 +158,6 @@ class EfficientNet(nn.Module):
         assert len(blocks_args) > 0, 'block args must be greater than 0'
         self._global_params = global_params
         self._blocks_args = blocks_args
-        self.layer_counter = 0
-        self.layer_img_size = [112, 56, 28, 28, 14, 14, 14, 14, 14, 14, 7, 7, 7, 7, 7]
 
         # Batch norm parameters
         bn_mom = 1 - self._global_params.batch_norm_momentum
@@ -198,9 +191,8 @@ class EfficientNet(nn.Module):
             if block_args.num_repeat > 1:  # modify block_args to keep same output size
                 block_args = block_args._replace(input_filters=block_args.output_filters, stride=1)
             for _ in range(block_args.num_repeat - 1):
-                self._blocks.append(MBConvBlock(block_args, self._global_params, image_size=self.layer_img_size[self.layer_counter]))
-                print(f'schicht: {self.layer_counter}')
-                self.layer_counter += 1
+                self._blocks.append(
+                    MBConvBlock(block_args, self._global_params, image_size=image_size))
         # Head
         in_channels = block_args.output_filters  # output of final block
         out_channels = round_filters(1280, self._global_params)

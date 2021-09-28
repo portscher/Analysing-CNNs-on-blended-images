@@ -12,6 +12,10 @@ Second, we trained them with blended images to find out how their performance ch
 Since humans solve this task by applying selective attention, we also measured the impact of two different attention mechanisms: the Convolutional Block Attention Module (CBAM) and the Attention Augmented Convolutional Network (AACN), using multi-headed self-attention. 
 Since the task can rather easily be solved by humans we examined whether a correlation between the similarity of a network architecture's structure to the human visual system and its ability to correctly classify objects on blended images could be found. 
 
+## Requirements
+
+See requirements.txt
+
 ## Data
 
 The corresponding dataset (including csv-files) can be found at https://www.kaggle.com/andreaport/blendeduibk
@@ -44,4 +48,14 @@ main folder
     └───reg
            train.csv
            val.csv        
+```
+### Training as network from scratch
+```
+python3 main.py [-h] --arch {resnet18,resnet50,inception,efficientnet,cornet_z,cornet_s,vision_transformer} [--attention {cbam,aacn,none}] [--blended] [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--lr LR]
+
+```
+### Predicting
+```
+python3 predict.py [-h] --arch {resnet18,resnet50,inception,efficientnet,cornet_z,cornet_s,vision_transformer} --path PATH [--blended] [--attention {cbam,aacn,none}] --test_folder TEST_FOLDER
+
 ```

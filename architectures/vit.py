@@ -3,15 +3,14 @@ import os
 import torch
 
 from .model import Model
-from .vit_definition import VisionTransformer
-from .vit_helpers import load_model_config_from_hf, is_model, model_entrypoint, load_checkpoint
-from .vit_layers import set_layer_config
+from architectures.vision_transformer.vit_helpers import load_model_config_from_hf, is_model, model_entrypoint, load_checkpoint
+from architectures.vision_transformer.vit_layers import set_layer_config
 
 
 class ViT(Model):
 
-    def __init__(self, train_from_scratch=True, path=None):
-        super().__init__(path, train_from_scratch)
+    def __init__(self, train_from_scratch=True, path=None, attention='none'):
+        super().__init__(path, train_from_scratch, attention)
         self.path = path
         self.train_from_scratch = train_from_scratch
 
@@ -20,7 +19,7 @@ class ViT(Model):
             'vit_base_patch16_224',
             pretrained=False,
             num_classes=8,
-            drop_rate=0.0)
+            drop_rate=0.0, attention='none')  # vision_transformer has attention per default
 
         if not self.train_from_scratch and os.path.isfile(self.path):
             print("Loading ViT from disk")
@@ -29,10 +28,6 @@ class ViT(Model):
 
         return model
 
-
-# All code below this point:
-# Author: rwrightman
-# Repository: https://github.com/rwightman/pytorch-image-models
 
 def split_model_name(model_name):
     model_split = model_name.split(':', 1)

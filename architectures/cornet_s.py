@@ -6,15 +6,17 @@ import torch
 import torch.utils.model_zoo
 from torch import nn
 
+from .aacn import AACN_Layer
 from .model import Model
 
 
 class CORnet(Model):
 
-    def __init__(self, train_from_scratch=True, path=None):
-        super().__init__(path, train_from_scratch)
+    def __init__(self, train_from_scratch=True, path=None, attention='none'):
+        super().__init__(path, train_from_scratch, attention)
         self.path = path
         self.train_from_scratch = train_from_scratch
+        self.attention = attention
 
     def get_model(self):
         model = torch.nn.DataParallel(CORnet_S())
@@ -27,10 +29,9 @@ class CORnet(Model):
         return model
 
 
-# All code below this point:
+# All CVcode below this point:
 # Authors: qbilius, mschrimpf (github username)
 # Github repo: https://github.com/dicarlolab/CORnet
-# Paper: https://arxiv.org/pdf/1909.06161.pdf
 
 class Flatten(nn.Module):
     """
@@ -53,22 +54,22 @@ class Identity(nn.Module):
 class CORblock_S(nn.Module):
     scale = 4  # scale of the bottleneck convolution channels
 
-    def __init__(self, in_channels, out_channels, times=1):
+    def __init__(self, in_channels, out_channels, img_size, times=1):
         super().__init__()
 
         self.times = times
-
         self.conv_input = nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False)
         self.skip = nn.Conv2d(out_channels, out_channels,
                               kernel_size=1, stride=2, bias=False)
         self.norm_skip = nn.BatchNorm2d(out_channels)
 
-        self.conv1 = nn.Conv2d(out_channels, out_channels * self.scale,
+        self.conv1 = nn.Conv2d(in_channels=out_channels, out_channels=out_channels * self.scale,
                                kernel_size=1, bias=False)
         self.nonlin1 = nn.ReLU(inplace=True)
 
-        self.conv2 = nn.Conv2d(out_channels * self.scale, out_channels * self.scale,
-                               kernel_size=3, stride=2, padding=1, bias=False)
+        self.conv2 = AACN_Layer(in_channels=out_channels * self.scale, out_channels=out_channels * self.scale, dk=40, dv=4,
+                                   kernel_size=3, num_heads=4, image_size=img_size, inference=False)
+
         self.nonlin2 = nn.ReLU(inplace=True)
 
         self.conv3 = nn.Conv2d(out_channels * self.scale, out_channels,
@@ -126,9 +127,9 @@ def CORnet_S():
             ('nonlin2', nn.ReLU(inplace=True)),
             ('output', Identity())
         ]))),
-        ('V2', CORblock_S(64, 128, times=2)),
-        ('V4', CORblock_S(128, 256, times=4)),
-        ('IT', CORblock_S(256, 512, times=2)),
+        ('V2', CORblock_S(64, 128, img_size=224 // 4, times=2)),
+        ('V4', CORblock_S(128, 256, img_size=224 // 8, times=4)),
+        ('IT', CORblock_S(256, 512, img_size=224 // 16, times=2)),
         ('decoder', nn.Sequential(OrderedDict([
             ('avgpool', nn.AdaptiveAvgPool2d(1)),
             ('flatten', Flatten()),

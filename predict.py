@@ -8,30 +8,23 @@ from tqdm import tqdm
 
 import image_dataset
 import utils
-from architectures import resnet18, resnet50, inception, efficientnet, cornet_z, cornet_s, vit, resnet18_cbam, \
-    resnet18_aacn
-
-
-def count_parameters(_model):
-    return sum(p.numel() for p in _model.parameters())
-
+from architectures import resnet50, inception_v3, cornet_z, cornet_s, vision_transformer, resnet18, efficientnet_b0
 
 ###################################################################################################################
 # Parse user input
 ###################################################################################################################
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-m', '--model', help='<Required> Which model to use', required=True,
-                    choices=['resnet18', 'resnet50', 'inception', 'efficientnet', 'cornet_z', 'cornet_s', 'vit'])
-parser.add_argument('-mp', '--model_path', required=True)
-parser.add_argument('-b', '--blended', action='store_true')
-parser.add_argument('-c', '--cbam', action='store_true')
-parser.add_argument('-a', '--aacn', action='store_true')
-parser.add_argument('-tf', '--test_folder', required=True)
+parser.add_argument('--arch', help='<Required> Which model to use', required=True,
+                    choices=['resnet18', 'resnet50', 'inception', 'efficientnet', 'cornet_z', 'cornet_s', 'vision_transformer'])
+parser.add_argument('--path', required=True)
+parser.add_argument('--blended', action='store_true')
+parser.add_argument('--attention', choices=['cbam', 'aacn', 'none'], default='none')
+parser.add_argument('--test_folder', required=True)
 
 args = parser.parse_args()
 
-if not args.model or not args.test_folder:
+if not args.arch or not args.test_folder:
     parser.print_help()
     sys.exit()
 
@@ -47,7 +40,7 @@ else:
 
 classes = test_csv.columns.values[1:]
 
-if args.model.lower() == 'inception':
+if args.arch.lower() == 'inception':
     img_size = 299
 else:
     img_size = 224
@@ -58,29 +51,23 @@ test_loader = DataLoader(test_set, batch_size=1, shuffle=False)
 arch = None
 num_classes = 0
 # initialize the model architecture
-if args.model.lower() == 'resnet18':
-    if args.cbam:
-        arch = resnet18_cbam.ResNet18CBAM(path=args.model_path, train_from_scratch=False)
-    elif args.aacn:
-        arch = resnet18_aacn.ResNet18AACN(path=args.model_path, train_from_scratch=False)
-    else:
-        arch = resnet18.ResNet18(path=args.model_path, train_from_scratch=False)
-elif args.model.lower() == 'resnet50':
-    arch = resnet50.ResNet50(path=args.model_path, train_from_scratch=False)
-elif args.model.lower() == 'inception':
-    arch = inception.Inception(path=args.model_path, train_from_scratch=False)
-elif args.model.lower() == 'cornet_z':
-    arch = cornet_z.CORnet(path=args.model_path, train_from_scratch=False)
-elif args.model.lower() == 'cornet_s':
-    arch = cornet_s.CORnet(path=args.model_path, train_from_scratch=False)
-elif args.model.lower() == 'efficientnet':
-    arch = efficientnet.EfficientNetB0(path=args.model_path, train_from_scratch=False)
-elif args.model.lower() == 'vit':
-    arch = vit.ViT(path=args.model_path, train_from_scratch=False)
+if args.arch.lower() == 'resnet18':
+    arch = resnet18.ResNet18(path=args.path, train_from_scratch=False, attention=args.attention)
+elif args.arch.lower() == 'resnet50':
+    arch = resnet50.ResNet50(path=args.path, train_from_scratch=False, attention=args.attention)
+elif args.arch.lower() == 'inception':
+    arch = inception_v3.Inception(path=args.path, train_from_scratch=False)
+elif args.arch.lower() == 'cornet_z':
+    arch = cornet_z.CORnet(path=args.path, train_from_scratch=False, attention=args.attention)
+elif args.arch.lower() == 'cornet_s':
+    arch = cornet_s.CORnet(path=args.path, train_from_scratch=False)
+elif args.arch.lower() == 'efficientnet':
+    arch = efficientnet_b0.EfficientNetB0(path=args.path, train_from_scratch=False)
+elif args.arch.lower() == 'vision_transformer':
+    arch = vision_transformer.ViT(path=args.path, train_from_scratch=False)
 
-model = arch.get_model().to(device)
+arch = arch.get_model().to(device)
 
-print(count_parameters(model))
 both_correct = 0
 one_correct = 0
 incorrect = 0
@@ -101,7 +88,7 @@ with torch.no_grad():
         target_indices = [i for i in range(len(target[0])) if target[0][i] == 1]
 
         # get the predictions by passing the image through the model
-        prediction = model(image)
+        prediction = arch(image)
 
         prediction = torch.sigmoid(prediction)
         prediction = prediction.detach().cpu()
@@ -137,7 +124,7 @@ with torch.no_grad():
 
 utils.print_results(both_correct, one_correct, incorrect, hyperclass_dict)
 
-utils.add_results_to_experiment_table(model_name=args.model,
+utils.add_results_to_experiment_table(model_name=args.arch,
                                       epochs=arch.get_num_epochs(),
                                       learning_rate=arch.get_learning_rate(),
                                       batch_size=arch.get_batch_size(),

@@ -1,24 +1,31 @@
 import os
 
 import torch
-import torch.nn as nn
-from torchvision import models as models
 
 from .model import Model
+from .aacn import AACN_ResNet
+from torchvision import models as models
+import torch.nn as nn
+from .resnet_att import ResidualNet
 
 
 class ResNet18(Model):
 
-    def __init__(self, train_from_scratch=True, path=None):
-        super().__init__(path, train_from_scratch)
+    def __init__(self, train_from_scratch=True, path=None, attention='none'):
+        super().__init__(path, train_from_scratch, attention)
         self.path = path
         self.train_from_scratch = train_from_scratch
+        self.attention = attention
 
     def get_model(self):
-        model = models.resnet18(progress=True)
-
-        # adjust the classification layer to classify 8 object types
-        model.fc = nn.Linear(512, 8)
+        if self.attention == 'none':
+            model = models.resnet18(progress=True)
+            # adjust the classification layer to classify 8 object types
+            model.fc = nn.Linear(512, 8)
+        elif self.attention == 'aacn':
+            model = AACN_ResNet.resnet18(num_classes=8, attention=[False, True, True, True], num_heads=4, k=2, v=0.25, image_size=224)
+        elif self.attention == 'cbam':
+            model = ResidualNet(18, 8, att_type='CBAM')
 
         if not self.train_from_scratch and os.path.isfile(self.path):
             print("Loading resnet18 from disk")

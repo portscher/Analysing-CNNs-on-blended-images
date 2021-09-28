@@ -1,8 +1,3 @@
-# All code below this point:
-# Author: martinger (github username)
-# GitHub Repository: https://github.com/MartinGer/Attention-Augmented-Convolutional-Networks
-# Paper: https://arxiv.org/pdf/1904.09925.pdf
-
 import torch
 from torch import Tensor
 import torch.nn as nn
@@ -61,7 +56,7 @@ class BasicBlock(nn.Module):
             self.conv2 = conv3x3(planes, planes)
         else:
             width = int(planes * (base_width / 64.)) * groups
-            self.conv2 = AACN_Layer(in_channels=width, k=0.25, v=0.25, kernel_size=3, num_heads=8,
+            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3, num_heads=num_heads,
                                     image_size=image_size, inference=inference)
         self.bn2 = norm_layer(planes)
         self.downsample = downsample
@@ -122,7 +117,7 @@ class Bottleneck(nn.Module):
         if not attention:
             self.conv2 = conv3x3(planes, planes)
         else:
-            self.conv2 = AACN_Layer(in_channels=width, k=0.25, v=0.25, kernel_size=3, num_heads=8,
+            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3, num_heads=num_heads,
                                     image_size=image_size, inference=inference)
         self.bn2 = norm_layer(width)
         self.conv3 = conv1x1(width, planes * self.expansion)
@@ -288,7 +283,6 @@ def _resnet(
 def resnet18(progress: bool = True, **kwargs: Any) -> ResNet:
     r"""ResNet-18 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
-
     Args:
         progress (bool): If True, displays a progress bar of the download to stderr
     """
@@ -296,105 +290,11 @@ def resnet18(progress: bool = True, **kwargs: Any) -> ResNet:
                    **kwargs)
 
 
-def resnet34(progress: bool = True, **kwargs: Any) -> ResNet:
-    r"""ResNet-34 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
-
-    Args:
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
-    return _resnet('resnet34', BasicBlock, [3, 4, 6, 3], progress,
-                   **kwargs)
-
-
 def resnet50(progress: bool = True, **kwargs: Any) -> ResNet:
     r"""ResNet-50 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
-
     Args:
         progress (bool): If True, displays a progress bar of the download to stderr
     """
     return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], progress,
                    **kwargs)
-
-
-def resnet101(progress: bool = True, **kwargs: Any) -> ResNet:
-    r"""ResNet-101 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
-
-    Args:
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
-    return _resnet('resnet101', Bottleneck, [3, 4, 23, 3], progress,
-                   **kwargs)
-
-
-def resnet152(progress: bool = True, **kwargs: Any) -> ResNet:
-    r"""ResNet-152 model from
-    `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_.
-
-    Args:
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
-    return _resnet('resnet152', Bottleneck, [3, 8, 36, 3], progress,
-                   **kwargs)
-
-
-def resnext50_32x4d(progress: bool = True, **kwargs: Any) -> ResNet:
-    r"""ResNeXt-50 32x4d model from
-    `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_.
-
-    Args:
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
-    kwargs['groups'] = 32
-    kwargs['width_per_group'] = 4
-    return _resnet('resnext50_32x4d', Bottleneck, [3, 4, 6, 3],
-                   progress, **kwargs)
-
-
-def resnext101_32x8d(progress: bool = True, **kwargs: Any) -> ResNet:
-    r"""ResNeXt-101 32x8d model from
-    `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_.
-
-    Args:
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
-    kwargs['groups'] = 32
-    kwargs['width_per_group'] = 8
-    return _resnet('resnext101_32x8d', Bottleneck, [3, 4, 23, 3],
-                   progress, **kwargs)
-
-
-def wide_resnet50_2(progress: bool = True, **kwargs: Any) -> ResNet:
-    r"""Wide ResNet-50-2 model from
-    `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_.
-
-    The model is the same as ResNet except for the bottleneck number of channels
-    which is twice larger in every block. The number of channels in outer 1x1
-    convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
-    channels, and in Wide ResNet-50-2 has 2048-1024-2048.
-
-    Args:
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
-    kwargs['width_per_group'] = 64 * 2
-    return _resnet('wide_resnet50_2', Bottleneck, [3, 4, 6, 3],
-                   progress, **kwargs)
-
-
-def wide_resnet101_2(progress: bool = True, **kwargs: Any) -> ResNet:
-    r"""Wide ResNet-101-2 model from
-    `"Wide Residual Networks" <https://arxiv.org/pdf/1605.07146.pdf>`_.
-
-    The model is the same as ResNet except for the bottleneck number of channels
-    which is twice larger in every block. The number of channels in outer 1x1
-    convolutions is the same, e.g. last block in ResNet-50 has 2048-512-2048
-    channels, and in Wide ResNet-50-2 has 2048-1024-2048.
-
-    Args:
-        progress (bool): If True, displays a progress bar of the download to stderr
-    """
-    kwargs['width_per_group'] = 64 * 2
-    return _resnet('wide_resnet101_2', Bottleneck, [3, 4, 23, 3],
-                   progress, **kwargs)

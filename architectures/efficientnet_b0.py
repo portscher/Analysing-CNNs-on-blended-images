@@ -2,16 +2,17 @@ import os
 
 import torch
 
-from .efficientnet_definition import EfficientNet
+from architectures.efficientnet.efficientnet_definition import EfficientNet
 from .model import Model
 
 
 class EfficientNetB0(Model):
 
-    def __init__(self, train_from_scratch=True, path=None):
-        super().__init__(path, train_from_scratch)
+    def __init__(self, train_from_scratch=True, path=None, attention='none'):
+        super().__init__(path, train_from_scratch, attention)
         self.path = path
         self.train_from_scratch = train_from_scratch
+        self.attention = attention
 
     def get_model(self):
         model = EfficientNet.from_name('efficientnet-b0', num_classes=8)

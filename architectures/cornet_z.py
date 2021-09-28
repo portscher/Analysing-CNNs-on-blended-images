@@ -5,18 +5,25 @@ import torch
 import torch.utils.model_zoo
 from torch import nn
 
+from .aacn import AACN_Layer
 from .model import Model
 
 
 class CORnet(Model):
 
-    def __init__(self, train_from_scratch=True, path=None):
-        super().__init__(path, train_from_scratch)
+    def __init__(self, train_from_scratch=True, path=None, attention='none'):
+        super().__init__(path, train_from_scratch, attention)
         self.path = path
         self.train_from_scratch = train_from_scratch
+        self.attention = attention
 
     def get_model(self):
-        model = torch.nn.DataParallel(CORnet_Z())
+        if self.attention == 'none':
+            model = torch.nn.DataParallel(CORnet_Z(attention=False))
+        elif self.attention == 'aacn':
+            model = torch.nn.DataParallel(CORnet_Z(attention=True))
+        else:
+            raise NotImplementedError('CBAM not yet implemented for CORnet_Z')
 
         if not self.train_from_scratch and os.path.isfile(self.path):
             print("Loading cornet-z from disk")
@@ -29,7 +36,6 @@ class CORnet(Model):
 # All code below this point:
 # Authors: qbilius, mschrimpf (github username)
 # Github repo: https://github.com/dicarlolab/CORnet
-# Paper: https://arxiv.org/pdf/1909.06161.pdf
 
 class Flatten(nn.Module):
     """
@@ -51,10 +57,15 @@ class Identity(nn.Module):
 
 class CORblock_Z(nn.Module):
 
-    def __init__(self, in_channels, out_channels, kernel_size=3, stride=1):
+    def __init__(self, in_channels, out_channels,  img_size, kernel_size=3, stride=1, att=False):
         super().__init__()
-        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size,
-                              stride=stride, padding=kernel_size // 2)
+        if att is False:
+            self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride,
+                                  padding=kernel_size // 2)
+        else:
+            self.conv = AACN_Layer(in_channels=in_channels, out_channels=out_channels, dk=40, dv=4,
+                                   kernel_size=kernel_size, num_heads=4, image_size=img_size, inference=False)
+
         self.nonlin = nn.ReLU(inplace=True)
         self.pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.output = Identity()  # for an easy access to this block's output
@@ -67,12 +78,18 @@ class CORblock_Z(nn.Module):
         return x
 
 
-def CORnet_Z():
+def CORnet_Z(attention):
+    if attention:
+        # replace all 3x3 convolutions with an attention-augmented convolution
+        att = [False, True, True, True]
+    else:
+        att = [False, False, False, False]
+
     model = nn.Sequential(OrderedDict([
-        ('V1', CORblock_Z(3, 64, kernel_size=7, stride=2)),
-        ('V2', CORblock_Z(64, 128)),
-        ('V4', CORblock_Z(128, 256)),
-        ('IT', CORblock_Z(256, 512)),
+        ('V1', CORblock_Z(3, 64, kernel_size=7, stride=2, img_size=224, att=att[0])),
+        ('V2', CORblock_Z(64, 128, img_size=224 // 4, att=att[1])),
+        ('V4', CORblock_Z(128, 256, img_size=224 // 8, att=att[2])),
+        ('IT', CORblock_Z(256, 512, img_size=224 // 16, att=att[3])),
         ('decoder', nn.Sequential(OrderedDict([
             ('avgpool', nn.AdaptiveAvgPool2d(1)),
             ('flatten', Flatten()),

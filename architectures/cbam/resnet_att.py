@@ -1,12 +1,7 @@
-# All code below this point:
-# Author Jongchan (GitHub username)
-# GitHub Repository: https://github.com/Jongchan/attention-module
-# Paper: https://openaccess.thecvf.com/content_ECCV_2018/papers/Sanghyun_Woo_Convolutional_Block_Attention_ECCV_2018_paper.pdf
-
 import torch.nn as nn
 from torch.nn import init
 
-from .cbam import CBAM
+from architectures.cbam import CBAM
 
 
 def conv3x3(in_planes, out_planes, stride=1):

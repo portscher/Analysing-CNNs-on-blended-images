@@ -2,16 +2,13 @@ import os
 
 import torch
 
-"""
-Interface class for all models
-"""
-
 
 class Model:
 
-    def __init__(self, path, train_from_scratch):
+    def __init__(self, path, train_from_scratch, attention):
         self.path = path
         self.train_from_scratch = train_from_scratch
+        self.attention = attention
 
     def get_model(self):
         """

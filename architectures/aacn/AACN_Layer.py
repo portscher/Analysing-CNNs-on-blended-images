@@ -1,11 +1,3 @@
-# All code below this point:
-# Author: martinger (github username)
-# GitHub Repository: https://github.com/MartinGer/Attention-Augmented-Convolutional-Networks
-# Paper: https://arxiv.org/pdf/1904.09925.pdf
-
-
-import math
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -15,23 +7,21 @@ device = torch.device("cuda" if use_cuda else "cpu")
 
 
 class AACN_Layer(nn.Module):
-    def __init__(self, in_channels, k=0.25, v=0.25, kernel_size=3, num_heads=8, image_size=224, inference=False):
+    def __init__(self, in_channels, out_channels, dk, dv, kernel_size=3, num_heads=8, image_size=224, inference=False):
         super(AACN_Layer, self).__init__()
         self.in_channels = in_channels
+        self.out_channels = out_channels
         self.kernel_size = kernel_size
         self.num_heads = num_heads
-        self.dk = math.floor((in_channels * k) / num_heads) * num_heads
-        # Paper: A minimum of 20 dimensions per head for the keys
-        if self.dk / num_heads < 20:
-            self.dk = num_heads * 20
-        self.dv = math.floor((in_channels * v) / num_heads) * num_heads
+        self.dk = dk
+        self.dv = dv
 
         assert self.dk % self.num_heads == 0, "dk should be divided by num_heads. (example: dk: 32, num_heads: 8)"
         assert self.dv % self.num_heads == 0, "dv should be divided by num_heads. (example: dv: 32, num_heads: 8)"
 
         self.padding = (self.kernel_size - 1) // 2
 
-        self.conv_out = nn.Conv2d(self.in_channels, self.in_channels - self.dv, self.kernel_size,
+        self.conv_out = nn.Conv2d(self.in_channels, self.out_channels - self.dv, kernel_size=self.kernel_size,
                                   padding=self.padding).to(device)
         self.kqv_conv = nn.Conv2d(self.in_channels, 2 * self.dk + self.dv, kernel_size=1)
         self.attn_out = nn.Conv2d(self.dv, self.dv, 1).to(device)
@@ -39,6 +29,7 @@ class AACN_Layer(nn.Module):
         # Positional encodings
         self.rel_encoding_h = nn.Parameter(
             torch.randn((2 * image_size - 1, self.dk // self.num_heads), requires_grad=True))
+
         self.rel_encoding_w = nn.Parameter(
             torch.randn((2 * image_size - 1, self.dk // self.num_heads), requires_grad=True))
 
@@ -103,10 +94,11 @@ class AACN_Layer(nn.Module):
                                                [0, 1, 4, 2, 5, 3])
         return rel_logits_h, rel_logits_w
 
-    # Compute relative logits along one dimenion.
+    # Compute relative logits along one dimension.
     def relative_logits_1d(self, q, rel_k, height, width, num_heads, transpose_mask):
         rel_logits = torch.einsum('bhxyd,md->bxym', q, rel_k)
         # Collapse height and heads
+        print(rel_logits.shape)
         rel_logits = torch.reshape(rel_logits, (-1, height, width, 2 * width - 1))
         rel_logits = self.rel_to_abs(rel_logits)
         # Shape it

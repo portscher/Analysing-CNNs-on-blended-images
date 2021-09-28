@@ -49,7 +49,7 @@ main folder
            train.csv
            val.csv        
 ```
-### Training as network from scratch
+### Training a network from scratch
 ```
 python3 main.py [-h] --arch {resnet18,resnet50,inception,efficientnet,cornet_z,cornet_s,vision_transformer} [--attention {cbam,aacn,none}] [--blended] [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--lr LR]
 

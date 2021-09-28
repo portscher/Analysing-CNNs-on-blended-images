@@ -12,6 +12,14 @@ Second, we trained them with blended images to find out how their performance ch
 Since humans solve this task by applying selective attention, we also measured the impact of two different attention mechanisms: the Convolutional Block Attention Module (CBAM) and the Attention Augmented Convolutional Network (AACN), using multi-headed self-attention. 
 Since the task can rather easily be solved by humans we examined whether a correlation between the similarity of a network architecture's structure to the human visual system and its ability to correctly classify objects on blended images could be found. 
 
+
+## Sources
+
+The EfficientNet definition is from https://github.com/lukemelas/EfficientNet-PyTorch.
+The Vision Transformer definition is from https://github.com/rwightman/pytorch-image-models.
+The CBAM code is from https://github.com/Jongchan/attention-module.
+The AACN code is from https://github.com/MartinGer/Attention-Augmented-Convolutional-Networks.
+
 ## Requirements
 
 See requirements.txt

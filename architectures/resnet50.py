@@ -17,12 +17,14 @@ class ResNet50(Model):
         self.attention = attention
 
     def get_model(self):
-        if self.attention == 'none':
+        if self.attention == 'cbam':
+            raise NotImplementedError('CBAM not yet implemented for ResNet50')
+        elif self.attention == 'aacn':
+            model = AACN_ResNet.resnet50(num_classes=8, attention=[False, True, True, True], num_heads=4, k=2, v=0.25, image_size=224)
+        else:
             model = models.resnet50(progress=True)
             # adjust the classification layer to classify 8 object types
             model.fc = nn.Linear(2048, 8)
-        elif self.attention == 'aacn':
-            model = AACN_ResNet.resnet50(num_classes=8, attention=[False, True, True, True], num_heads=4, k=2, v=0.25, image_size=224)
 
         if not self.train_from_scratch and os.path.isfile(self.path):
             print("Loading resnet50 from disk")

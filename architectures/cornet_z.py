@@ -18,12 +18,12 @@ class CORnet(Model):
         self.attention = attention
 
     def get_model(self):
-        if self.attention == 'none':
-            model = torch.nn.DataParallel(CORnet_Z(attention=False))
-        elif self.attention == 'aacn':
+        if self.attention == 'aacn':
             model = torch.nn.DataParallel(CORnet_Z(attention=True))
-        else:
+        elif self.attention == 'cbam':
             raise NotImplementedError('CBAM not yet implemented for CORnet_Z')
+        else:
+            model = torch.nn.DataParallel(CORnet_Z(attention=False))
 
         if not self.train_from_scratch and os.path.isfile(self.path):
             print("Loading cornet-z from disk")

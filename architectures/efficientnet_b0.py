@@ -15,7 +15,12 @@ class EfficientNetB0(Model):
         self.attention = attention
 
     def get_model(self):
-        model = EfficientNet.from_name('efficientnet-b0', num_classes=8)
+        if self.attention == 'aacn':
+            raise NotImplementedError('AACN not yet implemented for EfficientNet')
+        elif self.attention == 'cbam':
+            raise NotImplementedError('CBAM not yet implemented for EfficientNet')
+        else:
+            model = EfficientNet.from_name('efficientnet-b0', num_classes=8)
 
         if not self.train_from_scratch and os.path.isfile(self.path):
             print("Loading efficientnet from disk")

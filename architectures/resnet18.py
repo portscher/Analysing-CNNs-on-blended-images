@@ -6,7 +6,7 @@ from .model import Model
 from .aacn import AACN_ResNet
 from torchvision import models as models
 import torch.nn as nn
-from .resnet_att import ResidualNet
+from .cbam import resnet_att
 
 
 class ResNet18(Model):
@@ -25,7 +25,7 @@ class ResNet18(Model):
         elif self.attention == 'aacn':
             model = AACN_ResNet.resnet18(num_classes=8, attention=[False, True, True, True], num_heads=4, k=2, v=0.25, image_size=224)
         elif self.attention == 'cbam':
-            model = ResidualNet(18, 8, att_type='CBAM')
+            model = resnet_att.ResidualNet(18, 8, att_type='CBAM')
 
         if not self.train_from_scratch and os.path.isfile(self.path):
             print("Loading resnet18 from disk")

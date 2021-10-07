@@ -98,7 +98,7 @@ class AACN_Layer(nn.Module):
     def relative_logits_1d(self, q, rel_k, height, width, num_heads, transpose_mask):
         rel_logits = torch.einsum('bhxyd,md->bxym', q, rel_k)
         # Collapse height and heads
-        print(rel_logits.shape)
+        # print(f'Rel Logits: {rel_logits.shape}')
         rel_logits = torch.reshape(rel_logits, (-1, height, width, 2 * width - 1))
         rel_logits = self.rel_to_abs(rel_logits)
         # Shape it

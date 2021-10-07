@@ -2,8 +2,8 @@ import os
 
 import torch
 
-from architectures.efficientnet.efficientnet_definition import EfficientNet
 from .model import Model
+from architectures.efficientnet.efficient_definition2 import EfficientNet
 
 
 class EfficientNetB0(Model):
@@ -16,11 +16,11 @@ class EfficientNetB0(Model):
 
     def get_model(self):
         if self.attention == 'aacn':
-            raise NotImplementedError('AACN not yet implemented for EfficientNet')
+            model = EfficientNet(num_classes=8, attention=True)
         elif self.attention == 'cbam':
             raise NotImplementedError('CBAM not yet implemented for EfficientNet')
         else:
-            model = EfficientNet.from_name('efficientnet-b0', num_classes=8)
+            model = EfficientNet(num_classes=8, attention=False)
 
         if not self.train_from_scratch and os.path.isfile(self.path):
             print("Loading efficientnet from disk")

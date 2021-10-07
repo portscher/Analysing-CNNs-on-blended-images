@@ -3,7 +3,7 @@ import os
 import torch
 import torch.nn as nn
 
-from architectures.incpetion import inception_definition
+from architectures.inception import inception_definition
 from architectures.model import Model
 
 
@@ -18,11 +18,11 @@ class Inception(Model):
 
     def get_model(self):
         if self.attention == 'aacn':
-            raise NotImplementedError('AACN not yet implemented for Inception')
+            model = inception_definition.inception_v3(pretrained=False, progress=True, attention='aacn')
         elif self.attention == 'cbam':
             raise NotImplementedError('CBAM not yet implemented for Inception')
         else:
-            model = inception_definition.inception_v3(pretrained=False, progress=True)
+            model = inception_definition.inception_v3(pretrained=False, progress=True, attention='none')
 
         # adjust the classification layer to classify 8 object types
         model.fc = nn.Linear(2048, 8)

@@ -15,10 +15,10 @@ Since the task can rather easily be solved by humans we examined whether a corre
 
 ## Sources
 
-The EfficientNet definition is from https://github.com/lukemelas/EfficientNet-PyTorch.
+The basic EfficientNet definition (without attention) is from https://github.com/zsef123/EfficientNets-PyTorch.
 The Vision Transformer definition is from https://github.com/rwightman/pytorch-image-models.
 The CBAM code is from https://github.com/Jongchan/attention-module.
-The AACN code is from https://github.com/MartinGer/Attention-Augmented-Convolutional-Networks.
+The AACN code is (modified) from https://github.com/MartinGer/Attention-Augmented-Convolutional-Networks.
 
 ## Requirements
 

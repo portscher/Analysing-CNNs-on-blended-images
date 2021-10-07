@@ -12,11 +12,9 @@ import utils
 import wandb
 from architectures import resnet50, inception_v3, efficientnet_b0, cornet_z, cornet_s, vit, resnet18
 
-wandb.login()
 
 
 def adjust_learning_rate(optimizer, epoch, learning_rate):
-
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
     lr = learning_rate * (0.1 ** (epoch // 30))
     for param_group in optimizer.param_groups:
@@ -30,14 +28,20 @@ def main():
     ###################################################################################################################
     parser = argparse.ArgumentParser()
     parser.add_argument('--arch', required=True,
-                        choices=['resnet18', 'resnet50', 'inception', 'efficientnet', 'cornet_z', 'cornet_s', 'vision_transformer'])
+                        choices=['resnet18', 'resnet50', 'inception', 'efficientnet', 'cornet_z', 'cornet_s',
+                                 'vision_transformer'])
     parser.add_argument('--attention', choices=['cbam', 'aacn', 'none'], default='none')
     parser.add_argument('--blended', action='store_true')
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--epochs', type=int, default=70)
     parser.add_argument('--lr', type=float, default=0.1)
+    parser.add_argument('--local', action='store_true')
+    parser.add_argument('--wandb', action='store_true')
 
     args = parser.parse_args()
+
+    if args.wandb:
+        wandb.login()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -51,10 +55,10 @@ def main():
     elif arch == 'resnet18':
         model = resnet18.ResNet18(attention=args.attention).get_model().to(device)
     elif arch == 'inception':
-        model = inception_v3.Inception().get_model().to(device)
+        model = inception_v3.Inception(attention=args.attention).get_model().to(device)
         img_size = 299
     elif arch == 'efficientnet':
-        model = efficientnet_b0.EfficientNetB0().get_model().to(device)
+        model = efficientnet_b0.EfficientNetB0(attention=args.attention).get_model().to(device)
     elif arch == 'cornet_z':
         model = cornet_z.CORnet(attention=args.attention).get_model().to(device)
     elif arch == 'cornet_s':
@@ -89,11 +93,17 @@ def main():
         base = "../dataset/train/"
         csv_base = "../csv/"
 
-    wandb.init(project=arch,
-               config={'lr': learning_rate, 'batch_size': batch_size, 'n_epochs': epochs, 'optimizer': 'RMSprop',
-                       'wandb_nb': 'wandb_three_in_one_hm'})
+    if args.local:
+        save_name = 'egal'
+        base = "../thesis_code/dataset/train/boat/"
+        csv_base = "../thesis_code/csv/"
 
-    wandb.watch(model)
+    if args.wandb:
+        wandb.init(project=arch,
+                   config={'lr': learning_rate, 'batch_size': batch_size, 'n_epochs': epochs, 'optimizer': 'RMSprop',
+                           'wandb_nb': 'wandb_three_in_one_hm'})
+
+        wandb.watch(model)
 
     ###################################################################################################################
     # Prepare data for training
@@ -119,8 +129,8 @@ def main():
 
         adjust_learning_rate(optimizer, epoch, learning_rate)
 
-        train_epoch_loss = training.train(model, arch, train_loader, optimizer, criterion, train_set, device)
-        valid_epoch_loss = training.validate(model, arch, valid_loader, criterion, valid_set, device)
+        train_epoch_loss = training.train(model, arch, train_loader, optimizer, criterion, train_set, device, log=args.wandb)
+        valid_epoch_loss = training.validate(model, arch, valid_loader, criterion, valid_set, device, log=args.wandb)
 
         train_loss.append(train_epoch_loss)
         valid_loss.append(valid_epoch_loss)
@@ -135,7 +145,8 @@ def main():
     ###################################################################################################################
     # Save model and loss plot
     ###################################################################################################################
-    wandb.run.finish()
+    if args.wandb:
+        wandb.run.finish()
 
     utils.save_checkpoint(True, epochs, learning_rate, batch_size, model.state_dict(), optimizer.state_dict(),
                           criterion, 8, len(train_set), save_name)

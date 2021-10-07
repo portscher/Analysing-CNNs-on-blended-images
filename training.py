@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 # training function
-def train(model, model_name, dataloader, optimizer, criterion, train_data, device):
+def train(model, model_name, dataloader, optimizer, criterion, train_data, device, log):
     print('Training')
     model.train()
     counter = 0
@@ -28,13 +28,12 @@ def train(model, model_name, dataloader, optimizer, criterion, train_data, devic
         loss = criterion(output, target)
 
         log_dict = {f"train-loss": loss}
-        if i % 50 == 0:
-            log_dict[f"train_examples"] = [wandb.Image(i) for i in img[:10]]
-        wandb.log(log_dict)
+        if log:
+            if i % 50 == 0:
+                log_dict[f"train_examples"] = [wandb.Image(i) for i in img[:10]]
+            wandb.log(log_dict)
 
         train_running_loss += loss.item()
-
-        # compute gradient and do SGD step
 
         # backpropagation
         loss.backward()
@@ -46,7 +45,7 @@ def train(model, model_name, dataloader, optimizer, criterion, train_data, devic
 
 
 # validation function
-def validate(model, model_name, dataloader, criterion, val_data, device):
+def validate(model, model_name, dataloader, criterion, val_data, device, log):
     print('Validating')
     model.eval()
     counter = 0
@@ -78,10 +77,12 @@ def validate(model, model_name, dataloader, criterion, val_data, device):
             loss = criterion(output, target)
             val_running_loss += loss.item()
 
-            wandb.log({f"val-loss": loss})
+            if log:
+                wandb.log({f"val-loss": loss})
 
         epoch_acc = 100 * correct / total
-        wandb.log({f'val-accuracy': epoch_acc})
+        if log:
+            wandb.log({f'val-accuracy': epoch_acc})
         print(f"Correct: {correct}, total: {total}, validation accuracy: {epoch_acc:.4f}")
 
         val_loss = val_running_loss / counter

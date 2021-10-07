@@ -57,11 +57,11 @@ class Identity(nn.Module):
 
 class CORblock_Z(nn.Module):
 
-    def __init__(self, in_channels, out_channels,  img_size, kernel_size=3, stride=1, att=False):
+    def __init__(self, in_channels, out_channels, img_size, kernel_size=3, stride=1, att=False):
         super().__init__()
         if att is False:
-            self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride,
-                                  padding=kernel_size // 2)
+            self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=(kernel_size, kernel_size),
+                                  stride=(stride, stride), padding=kernel_size // 2)
         else:
             self.conv = AACN_Layer(in_channels=in_channels, out_channels=out_channels, dk=40, dv=4,
                                    kernel_size=kernel_size, num_heads=4, image_size=img_size, inference=False)

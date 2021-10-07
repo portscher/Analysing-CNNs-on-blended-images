@@ -75,10 +75,10 @@ def main():
     summary(model, input_size=(batch_size, 3, 224, 224), depth=3, verbose=1)
 
     if args.blended:
-        if args.cbam:
+        if args.attention == 'cbam':
             save_name = f"{arch}_cbam_blended"
-        elif args.aacn:
-            save_name = f"{arch}_aacm_blended"
+        elif args.attention == 'aacn':
+            save_name = f"{arch}_aacn_blended"
         else:
             save_name = f"{arch}_blended"
         base = "../blended_dataset/train/"
@@ -87,7 +87,7 @@ def main():
         if args.attention == 'cbam':
             save_name = f"{arch}_cbam"
         elif args.attention == 'aacn':
-            save_name = f"{arch}_aacm"
+            save_name = f"{arch}_aacn"
         else:
             save_name = arch
         base = "../dataset/train/"

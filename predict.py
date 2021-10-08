@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 import image_dataset
 import utils
-from architectures import resnet50, inception_v3, cornet_z, cornet_s, vision_transformer, resnet18, efficientnet_b0
+from architectures import resnet50, inception_v3, cornet_z, cornet_s, resnet18, efficientnet_b0, vit
 
 ###################################################################################################################
 # Parse user input
@@ -62,9 +62,9 @@ elif args.arch.lower() == 'cornet_z':
 elif args.arch.lower() == 'cornet_s':
     arch = cornet_s.CORnet(path=args.path, train_from_scratch=False)
 elif args.arch.lower() == 'efficientnet':
-    arch = efficientnet_b0.EfficientNetB0(path=args.path, train_from_scratch=False)
+    arch = efficientnet_b0.EfficientNetB0(path=args.path, train_from_scratch=False, attention=args.attention)
 elif args.arch.lower() == 'vision_transformer':
-    arch = vision_transformer.ViT(path=args.path, train_from_scratch=False)
+    arch = vit.ViT(path=args.path, train_from_scratch=False)
 
 arch = arch.get_model().to(device)
 

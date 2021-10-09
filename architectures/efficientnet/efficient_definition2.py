@@ -6,7 +6,7 @@ from .layers import Flatten
 from .layers import SEModule
 from .layers import SamePadConv2d
 from .layers import conv_bn_act
-from ..aacn import AACN_Layer
+from .layers import attention_layer
 
 
 class MBConv(nn.Module):
@@ -21,8 +21,7 @@ class MBConv(nn.Module):
             self.depth_wise_conv = conv_bn_act(mid_, mid_, kernel_size=kernel_size, stride=stride, groups=mid_,
                                                bias=False)
         else:
-            self.depth_wise_conv = AACN_Layer(in_channels=mid_, out_channels=mid_, kernel_size=kernel_size, num_heads=4,
-                                              image_size=img_size, dk=40, dv=4)
+            self.depth_wise_conv = attention_layer(in_=mid_, out_=mid_, kernel_size=kernel_size, img_size=img_size)
 
         self.se = SEModule(mid_, int(in_ * se_ratio)) if se_ratio > 0 else nn.Identity()
 

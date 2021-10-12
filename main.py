@@ -13,10 +13,9 @@ import wandb
 from architectures import resnet50, inception_v3, efficientnet_b0, cornet_z, cornet_s, vit, resnet18
 
 
-
 def adjust_learning_rate(optimizer, epoch, learning_rate):
     """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    lr = learning_rate * (0.1 ** (epoch // 30))
+    lr = learning_rate * (0.1 ** (epoch // 25))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
     print(f"LR: {lr}")
@@ -123,14 +122,18 @@ def main():
 
     train_loss = []
     valid_loss = []
+    valid_acc = 0
+    save_best = (None, None)
 
     for epoch in range(epochs):
         print(f"********************* EPOCH {epoch + 1} OF {epochs} *********************")
 
         adjust_learning_rate(optimizer, epoch, learning_rate)
 
-        train_epoch_loss = training.train(model, arch, train_loader, optimizer, criterion, train_set, device, log=args.wandb)
-        valid_epoch_loss = training.validate(model, arch, valid_loader, criterion, valid_set, device, log=args.wandb)
+        train_epoch_loss = training.train(model, arch, train_loader, optimizer, criterion, train_set, device,
+                                          log=args.wandb)
+        valid_epoch_loss, epoch_acc = training.validate(model, arch, valid_loader, criterion, valid_set, device,
+                                                        log=args.wandb)
 
         train_loss.append(train_epoch_loss)
         valid_loss.append(valid_epoch_loss)
@@ -139,16 +142,19 @@ def main():
 
         utils.log_loss(save_name, epoch + 1, train_epoch_loss, valid_epoch_loss)
 
+        if epoch_acc > valid_acc:
+            save_best = (model.state_dict(), optimizer.state_dict())
+
         if epoch % 30 == 0 and epoch != 0:
-            utils.save_checkpoint(False, epoch, learning_rate, batch_size, model.state_dict(),
-                                  optimizer.state_dict(), criterion, 8, len(train_set), save_name)
+            utils.save_checkpoint(False, epoch, learning_rate, batch_size, save_best[0],
+                                  save_best[1], criterion, 8, len(train_set), save_name)
     ###################################################################################################################
     # Save model and loss plot
     ###################################################################################################################
     if args.wandb:
         wandb.run.finish()
 
-    utils.save_checkpoint(True, epochs, learning_rate, batch_size, model.state_dict(), optimizer.state_dict(),
+    utils.save_checkpoint(True, epochs, learning_rate, batch_size, save_best[0], save_best[1],
                           criterion, 8, len(train_set), save_name)
 
     utils.plot_loss(save_name, train_loss, valid_loss)

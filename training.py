@@ -87,4 +87,4 @@ def validate(model, model_name, dataloader, criterion, val_data, device, log):
 
         val_loss = val_running_loss / counter
 
-        return val_loss
+        return val_loss, epoch_acc

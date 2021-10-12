@@ -9,7 +9,8 @@ def conv_bn_act(in_, out_, kernel_size,
                 stride=1, groups=1, bias=True,
                 eps=1e-3, momentum=0.01):
     return nn.Sequential(
-        SamePadConv2d(in_channels=in_, out_channels=out_, kernel_size=kernel_size, stride=(stride, stride), groups=groups, bias=bias),
+        SamePadConv2d(in_channels=in_, out_channels=out_, kernel_size=kernel_size, stride=(stride, stride),
+                      groups=groups, bias=bias),
         nn.BatchNorm2d(out_, eps, momentum),
         Swish()
     )
@@ -17,8 +18,8 @@ def conv_bn_act(in_, out_, kernel_size,
 
 def attention_layer(in_, out_, kernel_size, img_size, eps=1e-3, momentum=0.01):
     return nn.Sequential(
-        AACN_Layer(in_channels=in_, out_channels=out_, kernel_size=kernel_size, num_heads=4, image_size=img_size, dk=40,
-                   dv=4),
+        AACN_Layer(in_channels=in_, out_channels=out_, kernel_size=kernel_size, num_heads=4, image_size=img_size, v=0.2,
+                   k=0.2),
         nn.BatchNorm2d(out_, eps, momentum),
         Swish()
     )

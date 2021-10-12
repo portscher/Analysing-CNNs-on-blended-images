@@ -1,3 +1,5 @@
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,14 +9,16 @@ device = torch.device("cuda" if use_cuda else "cpu")
 
 
 class AACN_Layer(nn.Module):
-    def __init__(self, in_channels, out_channels, dk, dv, kernel_size=3, num_heads=8, image_size=224, inference=False):
+    def __init__(self, in_channels, out_channels, k, v, kernel_size=3, num_heads=8, image_size=224, inference=False):
         super(AACN_Layer, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
         self.num_heads = num_heads
-        self.dk = dk
-        self.dv = dv
+        self.dk = math.floor((in_channels * k) / num_heads) * num_heads
+        if self.dk / num_heads < 20:
+            self.dk = num_heads * 20
+        self.dv = math.floor((in_channels * v) / num_heads) * num_heads
 
         assert self.dk % self.num_heads == 0, "dk should be divided by num_heads. (example: dk: 32, num_heads: 8)"
         assert self.dv % self.num_heads == 0, "dv should be divided by num_heads. (example: dv: 32, num_heads: 8)"

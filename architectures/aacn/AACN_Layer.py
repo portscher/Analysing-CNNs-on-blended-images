@@ -9,7 +9,7 @@ device = torch.device("cuda" if use_cuda else "cpu")
 
 
 class AACN_Layer(nn.Module):
-    def __init__(self, in_channels, out_channels, k, v, kernel_size=3, num_heads=8, image_size=224, inference=False):
+    def __init__(self, in_channels, out_channels, k, v, image_size, kernel_size=3, num_heads=8, inference=False):
         super(AACN_Layer, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -31,12 +31,10 @@ class AACN_Layer(nn.Module):
         self.attn_out = nn.Conv2d(self.dv, self.dv, (1, 1)).to(device)
 
         # Positional encodings
-        self.rel_encoding_h = nn.Parameter(
+        self.rel_embeddings_h = nn.Parameter(
             torch.randn((2 * image_size - 1, self.dk // self.num_heads), requires_grad=True))
-
-        self.rel_encoding_w = nn.Parameter(
+        self.rel_embeddings_w = nn.Parameter(
             torch.randn((2 * image_size - 1, self.dk // self.num_heads), requires_grad=True))
-
         # later access attention weights
         self.inference = inference
         if self.inference:
@@ -93,8 +91,8 @@ class AACN_Layer(nn.Module):
     # Compute relative logits for both dimensions.
     def relative_logits(self, q):
         _, num_heads, height, width, dkh = q.size()
-        rel_logits_w = self.relative_logits_1d(q, self.rel_encoding_w, height, width, num_heads, [0, 1, 2, 4, 3, 5])
-        rel_logits_h = self.relative_logits_1d(torch.transpose(q, 2, 3), self.rel_encoding_h, width, height, num_heads,
+        rel_logits_w = self.relative_logits_1d(q, self.rel_embeddings_w, height, width, num_heads, [0, 1, 2, 4, 3, 5])
+        rel_logits_h = self.relative_logits_1d(torch.transpose(q, 2, 3), self.rel_embeddings_h, width, height, num_heads,
                                                [0, 1, 4, 2, 5, 3])
         return rel_logits_h, rel_logits_w
 
@@ -102,7 +100,6 @@ class AACN_Layer(nn.Module):
     def relative_logits_1d(self, q, rel_k, height, width, num_heads, transpose_mask):
         rel_logits = torch.einsum('bhxyd,md->bxym', q, rel_k)
         # Collapse height and heads
-        # print(f'Rel Logits: {rel_logits.shape}')
         rel_logits = torch.reshape(rel_logits, (-1, height, width, 2 * width - 1))
         rel_logits = self.rel_to_abs(rel_logits)
         # Shape it

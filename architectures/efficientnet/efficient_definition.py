@@ -2,11 +2,11 @@ import math
 
 import torch.nn as nn
 
-from .layers import Flatten
-from .layers import SEModule
-from .layers import SamePadConv2d
-from .layers import conv_bn_act
-from .layers import attention_layer
+from .efficientnet_layers import Flatten
+from .efficientnet_layers import SEModule
+from .efficientnet_layers import SamePadConv2d
+from .efficientnet_layers import conv_bn_act
+from .efficientnet_layers import attention_layer
 
 
 class MBConv(nn.Module):

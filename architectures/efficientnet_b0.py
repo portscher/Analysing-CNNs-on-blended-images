@@ -3,7 +3,7 @@ import os
 import torch
 
 from .model import Model
-from architectures.efficientnet.efficient_definition2 import EfficientNet
+from architectures.efficientnet.efficient_definition import EfficientNet
 
 
 class EfficientNetB0(Model):

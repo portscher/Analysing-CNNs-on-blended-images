@@ -63,7 +63,7 @@ class CORblock_Z(nn.Module):
             self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=(kernel_size, kernel_size),
                                   stride=(stride, stride), padding=kernel_size // 2)
         else:
-            self.conv = AACN_Layer(in_channels=in_channels, out_channels=out_channels, dk=40, dv=4,
+            self.conv = AACN_Layer(in_channels=in_channels, out_channels=out_channels, k=0.2, v=0.2,
                                    kernel_size=kernel_size, num_heads=4, image_size=img_size, inference=False)
 
         self.nonlin = nn.ReLU(inplace=True)

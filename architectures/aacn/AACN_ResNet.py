@@ -55,7 +55,7 @@ class BasicBlock(nn.Module):
             self.conv2 = conv3x3(planes, planes)
         else:
             width = int(planes * (base_width / 64.)) * groups
-            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3,
+            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, k=0.2, v=0.2, kernel_size=3,
                                     num_heads=num_heads, image_size=image_size, inference=inference)
         self.bn2 = norm_layer(planes)
         self.downsample = downsample
@@ -116,9 +116,8 @@ class Bottleneck(nn.Module):
         if not attention:
             self.conv2 = conv3x3(planes, planes)
         else:
-            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3,
-                                    num_heads=num_heads,
-                                    image_size=image_size, inference=inference)
+            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, k=0.2, v=0.2, kernel_size=3,
+                                    num_heads=num_heads, image_size=image_size, inference=inference)
         self.bn2 = norm_layer(width)
         self.conv3 = conv1x1(width, planes * self.expansion)
         self.bn3 = norm_layer(planes * self.expansion)

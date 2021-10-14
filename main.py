@@ -61,7 +61,7 @@ def main():
     elif arch == 'cornet_z':
         model = cornet_z.CORnet(attention=args.attention).get_model().to(device)
     elif arch == 'cornet_s':
-        model = cornet_s.CORnet().get_model().to(device)
+        model = cornet_s.CORnet(attention=args.attention).get_model().to(device)
     elif arch == 'vision_transformer':
         model = vit.ViT().get_model().to(device)
 
@@ -71,7 +71,7 @@ def main():
     optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate, weight_decay=1e-5, momentum=0.9)
     criterion = torch.nn.BCELoss()  # Binary Cross Entropy
 
-    summary(model, input_size=(batch_size, 3, 224, 224), depth=3, verbose=1)
+    summary(model, input_size=(batch_size, 3, img_size, img_size), depth=4, verbose=1)
 
     if args.blended:
         if args.attention == 'cbam':

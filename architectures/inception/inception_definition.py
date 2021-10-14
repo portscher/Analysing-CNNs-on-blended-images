@@ -94,7 +94,7 @@ class Inception3(nn.Module):
         self.AuxLogits: Optional[nn.Module] = None
         if aux_logits:
             self.AuxLogits = inception_aux(768, num_classes)
-        self.Mixed_7a = inception_d(768, attention=self.attention, img_size=8)
+        self.Mixed_7a = inception_d(768)
         self.Mixed_7b = inception_e(1280, attention=self.attention, img_size=8)
         self.Mixed_7c = inception_e(2048, attention=self.attention, img_size=8)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))

@@ -1,10 +1,10 @@
-from collections import namedtuple
 import warnings
-import torch
-from torch import nn, Tensor
-import torch.nn.functional as F
+from collections import namedtuple
 from typing import Callable, Any, Optional, Tuple, List
 
+import torch
+import torch.nn.functional as F
+from torch import nn, Tensor
 
 __all__ = ['Inception3', 'inception_v3', 'InceptionOutputs', '_InceptionOutputs']
 
@@ -23,7 +23,8 @@ InceptionOutputs.__annotations__ = {'logits': Tensor, 'aux_logits': Optional[Ten
 _InceptionOutputs = InceptionOutputs
 
 
-def inception_v3(pretrained: bool = False, progress: bool = True, attention: str = 'none', **kwargs: Any) -> "Inception3":
+def inception_v3(pretrained: bool = False, progress: bool = True, attention: str = 'none',
+                 **kwargs: Any) -> "Inception3":
     r"""Inception v3 model architecture from
     `"Rethinking the Inception Architecture for Computer Vision" <http://arxiv.org/abs/1512.00567>`_.
 
@@ -43,13 +44,13 @@ def inception_v3(pretrained: bool = False, progress: bool = True, attention: str
 class Inception3(nn.Module):
 
     def __init__(
-        self,
-        attention,
-        num_classes: int = 8,
-        aux_logits: bool = True,
-        transform_input: bool = False,
-        inception_blocks: Optional[List[Callable[..., nn.Module]]] = None,
-        init_weights: Optional[bool] = None
+            self,
+            attention,
+            num_classes: int = 8,
+            aux_logits: bool = True,
+            transform_input: bool = False,
+            inception_blocks: Optional[List[Callable[..., nn.Module]]] = None,
+            init_weights: Optional[bool] = None
     ) -> None:
         super(Inception3, self).__init__()
         self.attention = attention
@@ -93,8 +94,8 @@ class Inception3(nn.Module):
         self.AuxLogits: Optional[nn.Module] = None
         if aux_logits:
             self.AuxLogits = inception_aux(768, num_classes)
-        self.Mixed_7a = inception_d(768, attention=self.attention)
-        self.Mixed_7b = inception_e(1280, attention=self.attention)
+        self.Mixed_7a = inception_d(768, attention='none')
+        self.Mixed_7b = inception_e(1280, attention='none')
         self.Mixed_7c = inception_e(2048, attention=self.attention)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.dropout = nn.Dropout()
@@ -196,10 +197,10 @@ class Inception3(nn.Module):
 class InceptionA(nn.Module):
 
     def __init__(
-        self,
-        in_channels: int,
-        pool_features: int,
-        conv_block: Optional[Callable[..., nn.Module]] = None
+            self,
+            in_channels: int,
+            pool_features: int,
+            conv_block: Optional[Callable[..., nn.Module]] = None
     ) -> None:
         super(InceptionA, self).__init__()
         if conv_block is None:
@@ -211,7 +212,7 @@ class InceptionA(nn.Module):
 
         self.branch3x3dbl_1 = conv_block(in_channels, 64, kernel_size=1)
         self.branch3x3dbl_2 = conv_block(64, 96, kernel_size=3, padding=1)
-        self.branch3x3dbl_3 = conv_block(96, 96, kernel_size=3, padding=1)
+        self.branch3x3dbl_3 = conv_block(96, 96, kernel_size=3, padding=1) # AttentionConv2d(96, 96, image_size=35, num_heads=4)
 
         self.branch_pool = conv_block(in_channels, pool_features, kernel_size=1)
 
@@ -239,9 +240,9 @@ class InceptionA(nn.Module):
 class InceptionB(nn.Module):
 
     def __init__(
-        self,
-        in_channels: int,
-        conv_block: Optional[Callable[..., nn.Module]] = None
+            self,
+            in_channels: int,
+            conv_block: Optional[Callable[..., nn.Module]] = None
     ) -> None:
         super(InceptionB, self).__init__()
         if conv_block is None:
@@ -272,10 +273,10 @@ class InceptionB(nn.Module):
 class InceptionC(nn.Module):
 
     def __init__(
-        self,
-        in_channels: int,
-        channels_7x7: int,
-        conv_block: Optional[Callable[..., nn.Module]] = None
+            self,
+            in_channels: int,
+            channels_7x7: int,
+            conv_block: Optional[Callable[..., nn.Module]] = None
     ) -> None:
         super(InceptionC, self).__init__()
         if conv_block is None:
@@ -322,10 +323,10 @@ class InceptionC(nn.Module):
 class InceptionD(nn.Module):
 
     def __init__(
-        self,
-        in_channels: int,
-        attention: str,
-        conv_block: Optional[Callable[..., nn.Module]] = None
+            self,
+            in_channels: int,
+            attention: str,
+            conv_block: Optional[Callable[..., nn.Module]] = None
     ) -> None:
         super(InceptionD, self).__init__()
         if conv_block is None:
@@ -334,9 +335,7 @@ class InceptionD(nn.Module):
         if attention == 'none':
             self.branch3x3_2 = conv_block(192, 320, kernel_size=3, stride=2)
         elif attention == 'aacn':
-            self.branch3x3_2 = conv_block(192, 320, kernel_size=3, stride=2)
-            #self.branch3x3_2 = AACN_Layer(192, 320, kernel_size=3, image_size=12, num_heads=4, dk=40, dv=4)
-            #self.bn = nn.BatchNorm2d(320, eps=0.001)
+            self.branch3x3_2 = AttentionConv2d(192, 320, image_size=8, num_heads=4)
 
         self.branch7x7x3_1 = conv_block(in_channels, 192, kernel_size=1)
         self.branch7x7x3_2 = conv_block(192, 192, kernel_size=(1, 7), padding=(0, 3))
@@ -365,10 +364,10 @@ class InceptionD(nn.Module):
 class InceptionE(nn.Module):
 
     def __init__(
-        self,
-        in_channels: int,
-        attention: str,
-        conv_block: Optional[Callable[..., nn.Module]] = None
+            self,
+            in_channels: int,
+            attention: str,
+            conv_block: Optional[Callable[..., nn.Module]] = None
     ) -> None:
         super(InceptionE, self).__init__()
         if conv_block is None:
@@ -380,11 +379,12 @@ class InceptionE(nn.Module):
         self.branch3x3_2b = conv_block(384, 384, kernel_size=(3, 1), padding=(1, 0))
 
         self.branch3x3dbl_1 = conv_block(in_channels, 448, kernel_size=1)
+
         if attention == 'none':
             self.branch3x3dbl_2 = conv_block(448, 384, kernel_size=3, padding=1)
-        if attention == 'aacn':
-            self.branch3x3dbl_2 = AACN_Layer(448, 384, kernel_size=3, image_size=5, dk=40, dv=4, num_heads=4)
-            self.bn = nn.BatchNorm2d(384, eps=0.001)
+        elif attention == 'aacn':
+            self.branch3x3dbl_2 = AttentionConv2d(448, 384, image_size=8, num_heads=4)
+
         self.branch3x3dbl_3a = conv_block(384, 384, kernel_size=(1, 3), padding=(0, 1))
         self.branch3x3dbl_3b = conv_block(384, 384, kernel_size=(3, 1), padding=(1, 0))
 
@@ -422,10 +422,10 @@ class InceptionE(nn.Module):
 class InceptionAux(nn.Module):
 
     def __init__(
-        self,
-        in_channels: int,
-        num_classes: int,
-        conv_block: Optional[Callable[..., nn.Module]] = None
+            self,
+            in_channels: int,
+            num_classes: int,
+            conv_block: Optional[Callable[..., nn.Module]] = None
     ) -> None:
         super(InceptionAux, self).__init__()
         if conv_block is None:
@@ -457,13 +457,27 @@ class InceptionAux(nn.Module):
 class BasicConv2d(nn.Module):
 
     def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        **kwargs: Any
+            self,
+            in_channels: int,
+            out_channels: int,
+            **kwargs: Any
     ) -> None:
         super(BasicConv2d, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, bias=False, **kwargs)
+        self.bn = nn.BatchNorm2d(out_channels, eps=0.001)
+
+    def forward(self, x: Tensor) -> Tensor:
+        x = self.conv(x)
+        x = self.bn(x)
+        return F.relu(x, inplace=True)
+
+
+class AttentionConv2d(nn.Module):
+
+    def __init__(self, in_channels: int, out_channels: int, image_size: int, num_heads: int) -> None:
+        super().__init__()
+        self.conv = AACN_Layer(in_channels=in_channels, out_channels=out_channels, image_size=image_size,
+                               num_heads=num_heads, k=0.2, v=0.2)
         self.bn = nn.BatchNorm2d(out_channels, eps=0.001)
 
     def forward(self, x: Tensor) -> Tensor:

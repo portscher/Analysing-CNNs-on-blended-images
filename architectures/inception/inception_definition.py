@@ -326,18 +326,15 @@ class InceptionD(nn.Module):
     def __init__(
             self,
             in_channels: int,
-            attention: str,
-            img_size: int,
             conv_block: Optional[Callable[..., nn.Module]] = None
     ) -> None:
         super(InceptionD, self).__init__()
         if conv_block is None:
             conv_block = BasicConv2d
         self.branch3x3_1 = conv_block(in_channels, 192, kernel_size=1)
-        if attention == 'none':
-            self.branch3x3_2 = conv_block(192, 320, kernel_size=3, stride=2)
-        elif attention == 'aacn':
-            self.branch3x3_2 = AttentionConv2d(192, 320, image_size=img_size, num_heads=4, stride=2)
+        self.branch3x3_2 = conv_block(192, 320, kernel_size=3, stride=2)
+        # if attention == 'aacn':
+        #    self.branch3x3_2 = AttentionConv2d(192, 320, image_size=img_size, num_heads=4, stride=2)
 
         self.branch7x7x3_1 = conv_block(in_channels, 192, kernel_size=1)
         self.branch7x7x3_2 = conv_block(192, 192, kernel_size=(1, 7), padding=(0, 3))

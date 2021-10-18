@@ -56,7 +56,7 @@ if args.arch.lower() == 'resnet18':
 elif args.arch.lower() == 'resnet50':
     arch = resnet50.ResNet50(path=args.path, train_from_scratch=False, attention=args.attention)
 elif args.arch.lower() == 'inception':
-    arch = inception_v3.Inception(path=args.path, train_from_scratch=False)
+    arch = inception_v3.Inception(path=args.path, train_from_scratch=False, attention=args.attention)
 elif args.arch.lower() == 'cornet_z':
     arch = cornet_z.CORnet(path=args.path, train_from_scratch=False, attention=args.attention)
 elif args.arch.lower() == 'cornet_s':

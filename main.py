@@ -80,7 +80,7 @@ def main():
             save_name = f"{arch}_aacn_blended"
         else:
             save_name = f"{arch}_blended"
-        base = "../blended_dataset/train/"
+        base = "../blended_dataset/"
         csv_base = "../csv/blended/"
     else:
         if args.attention == 'cbam':

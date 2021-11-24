@@ -4,8 +4,8 @@ import torch
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 
-mean = [0.0449, -0.0222, 0.0572]
-std = [0.9864, 0.9709, 0.9740]
+mean = [0.485, 0.456, 0.406]
+std = [0.229, 0.224, 0.225]
 
 
 class ImageDataset(Dataset):

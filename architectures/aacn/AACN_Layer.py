@@ -9,31 +9,26 @@ device = torch.device("cuda" if use_cuda else "cpu")
 
 
 class AACN_Layer(nn.Module):
-    def __init__(self, in_channels, out_channels, k, v, image_size, kernel_size=3, stride=1, num_heads=8,
+    def __init__(self, in_channels, out_channels, dk, dv, image_size, kernel_size=3, num_heads=8,
                  inference=False):
         super(AACN_Layer, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
-        self.stride = stride
         self.num_heads = num_heads
-        self.dk = math.floor((in_channels * k) / num_heads) * num_heads
-        if self.dk / num_heads < 20:
-            self.dk = num_heads * 20
-        self.dv = math.floor((in_channels * v) / num_heads) * num_heads
+        self.dk = dk
+        self.dv = dv
 
         assert self.dk % self.num_heads == 0, "dk should be divided by num_heads. (example: dk: 32, num_heads: 8)"
         assert self.dv % self.num_heads == 0, "dv should be divided by num_heads. (example: dv: 32, num_heads: 8)"
-        assert stride in [1, 2], str(stride) + " Up to 2 strides are allowed."
 
         self.padding = (self.kernel_size - 1) // 2
 
         self.conv_out = nn.Conv2d(self.in_channels, self.out_channels - self.dv,
-                                  kernel_size=(self.kernel_size, self.kernel_size), stride=(self.stride, self.stride),
+                                  kernel_size=self.kernel_size,
                                   padding=self.padding).to(device)
-        self.kqv_conv = nn.Conv2d(self.in_channels, 2 * self.dk + self.dv, kernel_size=(1, 1),
-                                  stride=(self.stride, self.stride))
-        self.attn_out = nn.Conv2d(self.dv, self.dv, (1, 1)).to(device)
+        self.kqv_conv = nn.Conv2d(self.in_channels, 2 * self.dk + self.dv, kernel_size=1)
+        self.attn_out = nn.Conv2d(self.dv, self.dv, 1).to(device)
 
         # Positional encodings
         self.rel_embeddings_h = nn.Parameter(
@@ -49,7 +44,7 @@ class AACN_Layer(nn.Module):
         batch_size, _, height, width = x.size()
         dkh = self.dk // self.num_heads
         dvh = self.dv // self.num_heads
-        flatten_hw = lambda e, depth: torch.reshape(e, (batch_size, self.num_heads, height * width, depth))
+        flatten_hw = lambda x, depth: torch.reshape(x, (batch_size, self.num_heads, height * width, depth))
 
         # Compute q, k, v
         kqv = self.kqv_conv(x)

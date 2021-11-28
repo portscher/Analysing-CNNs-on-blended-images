@@ -34,7 +34,6 @@ def main():
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--epochs', type=int, default=70)
     parser.add_argument('--lr', type=float, default=0.1)
-    parser.add_argument('--local', action='store_true')
     parser.add_argument('--wandb', action='store_true')
 
     args = parser.parse_args()
@@ -91,11 +90,6 @@ def main():
             save_name = arch
         base = "../dataset/train/"
         csv_base = "../csv/"
-
-    if args.local:
-        save_name = 'egal'
-        base = "../thesis_code/dataset/train/boat/"
-        csv_base = "../thesis_code/csv/"
 
     if args.wandb:
         wandb.init(project=arch,

@@ -34,9 +34,9 @@ if not args.arch or not args.test_folder:
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 if args.blended:
-    test_csv = pd.read_csv('../csv/bl_test_labels.csv')
+    test_csv = pd.read_csv('../csv/blended/test.csv')
 else:
-    test_csv = pd.read_csv('../csv/test_labels.csv')
+    test_csv = pd.read_csv('../csv/reg/test.csv')
 
 classes = test_csv.columns.values[1:]
 
@@ -60,7 +60,7 @@ elif args.arch.lower() == 'inception':
 elif args.arch.lower() == 'cornet_z':
     arch = cornet_z.CORnet(path=args.path, train_from_scratch=False, attention=args.attention)
 elif args.arch.lower() == 'cornet_s':
-    arch = cornet_s.CORnet(path=args.path, train_from_scratch=False)
+    arch = cornet_s.CORnet(path=args.path, train_from_scratch=False, attention=args.attention)
 elif args.arch.lower() == 'efficientnet':
     arch = efficientnet_b0.EfficientNetB0(path=args.path, train_from_scratch=False, attention=args.attention)
 elif args.arch.lower() == 'vision_transformer':

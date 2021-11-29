@@ -14,8 +14,8 @@ from architectures import resnet50, inception_v3, efficientnet_b0, cornet_z, cor
 
 
 def adjust_learning_rate(optimizer, epoch, learning_rate):
-    """Sets the learning rate to the initial LR decayed by 10 every 30 epochs"""
-    lr = learning_rate * (0.1 ** (epoch // 25))
+    """Sets the learning rate to the initial LR decayed by 10 every 20 epochs"""
+    lr = learning_rate * (0.1 ** (epoch // 20))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
     print(f"LR: {lr}")

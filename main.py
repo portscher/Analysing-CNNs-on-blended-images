@@ -128,7 +128,6 @@ def main():
                                           log=args.wandb)
         valid_epoch_loss, epoch_acc = training.validate(model, arch, valid_loader, criterion, valid_set, device,
                                                         log=args.wandb)
-
         train_loss.append(train_epoch_loss)
         valid_loss.append(valid_epoch_loss)
         print("{:<20} {:<15}".format("Train epoch loss:", f"{train_epoch_loss:.4f}"))
@@ -137,19 +136,13 @@ def main():
         utils.log_loss(save_name, epoch + 1, train_epoch_loss, valid_epoch_loss)
 
         if epoch_acc > valid_acc:
-            save_best = (model.state_dict(), optimizer.state_dict())
-
-        if epoch % 30 == 0 and epoch != 0:
-            utils.save_checkpoint(False, epoch, learning_rate, batch_size, save_best[0],
-                                  save_best[1], criterion, 8, len(train_set), save_name)
+            utils.save_checkpoint(epoch, learning_rate, batch_size, model.state_dict(),
+                                  optimizer.state_dict(), criterion, 8, len(train_set), save_name)
     ###################################################################################################################
     # Save model and loss plot
     ###################################################################################################################
     if args.wandb:
         wandb.run.finish()
-
-    utils.save_checkpoint(True, epochs, learning_rate, batch_size, save_best[0], save_best[1],
-                          criterion, 8, len(train_set), save_name)
 
     utils.plot_loss(save_name, train_loss, valid_loss)
 

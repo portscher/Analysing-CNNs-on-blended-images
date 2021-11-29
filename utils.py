@@ -32,7 +32,7 @@ def plot_loss(model_name, train_loss, valid_loss):
     plt.savefig(f'outputs/{model_name}_loss.png')
 
 
-def save_checkpoint(final, epoch, lr, batch_size, model_state_dict, opt_state_dict, criterion, nclasses, ntrain_imgs,
+def save_checkpoint(epoch, lr, batch_size, model_state_dict, opt_state_dict, criterion, nclasses, ntrain_imgs,
                     save_name):
     """
     Saves a checkpoint/final model to the disk
@@ -50,10 +50,7 @@ def save_checkpoint(final, epoch, lr, batch_size, model_state_dict, opt_state_di
 
     # save the trained model to disk
     time = datetime.now().strftime("%b%d")
-    if not final:
-        torch.save(checkpoint_dict, f"outputs/{save_name}_{time}_epoch{epoch}.pth")
-    else:
-        torch.save(checkpoint_dict, f"outputs/{save_name}_{time}_final.pth")
+    torch.save(checkpoint_dict, f"outputs/{save_name}_{time}_best.pth")
 
 
 def check_if_one_common_element(list1, list2):

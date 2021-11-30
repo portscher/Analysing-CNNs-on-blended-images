@@ -3,6 +3,8 @@ import gc
 
 import pandas as pd
 import torch
+from torch.nn import BCELoss
+from torch.optim import Optimizer, RMSprop
 from torch.utils.data import DataLoader
 from torchinfo import summary
 
@@ -13,8 +15,14 @@ import wandb
 from architectures import resnet50, inception_v3, efficientnet_b0, cornet_z, cornet_s, vit, resnet18
 
 
-def adjust_learning_rate(optimizer, epoch, learning_rate):
-    """Sets the learning rate to the initial LR decayed by 10 every 20 epochs"""
+def adjust_learning_rate(
+        optimizer: Optimizer,
+        epoch: int,
+        learning_rate: float
+) -> None:
+    """
+    Sets the learning rate to the initial LR decayed by 10 every 20 epochs
+    """
     lr = learning_rate * (0.1 ** (epoch // 20))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
@@ -67,9 +75,10 @@ def main():
     # learning parameters
     epochs = args.epochs
     batch_size = args.batch_size
-    optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate, weight_decay=1e-5, momentum=0.9)
-    criterion = torch.nn.BCELoss()  # Binary Cross Entropy
+    optimizer = RMSprop(model.parameters(), lr=learning_rate, weight_decay=1e-5, momentum=0.9)
+    criterion = BCELoss()  # Binary Cross Entropy
 
+    # Print model summary
     summary(model, input_size=(batch_size, 3, img_size, img_size), depth=4, verbose=1)
 
     if args.blended:
@@ -117,23 +126,18 @@ def main():
     train_loss = []
     valid_loss = []
     valid_acc = 0
-    save_best = (None, None)
 
     for epoch in range(epochs):
         print(f"********************* EPOCH {epoch + 1} OF {epochs} *********************")
 
         adjust_learning_rate(optimizer, epoch, learning_rate)
 
-        train_epoch_loss = training.train(model, arch, train_loader, optimizer, criterion, train_set, device,
-                                          log=args.wandb)
-        valid_epoch_loss, epoch_acc = training.validate(model, arch, valid_loader, criterion, valid_set, device,
-                                                        log=args.wandb)
+        train_epoch_loss = training.train(model, arch, train_loader, optimizer, criterion, train_set, device, log=args.wandb)
+        valid_epoch_loss, epoch_acc = training.validate(model, valid_loader, criterion, valid_set, device, log=args.wandb)
         train_loss.append(train_epoch_loss)
         valid_loss.append(valid_epoch_loss)
         print("{:<20} {:<15}".format("Train epoch loss:", f"{train_epoch_loss:.4f}"))
         print("{:<20} {:<15}".format("Validation epoch loss:", f"{valid_epoch_loss:.4f}"))
-
-        utils.log_loss(save_name, epoch + 1, train_epoch_loss, valid_epoch_loss)
 
         if epoch_acc > valid_acc:
             utils.save_checkpoint(epoch, learning_rate, batch_size, model.state_dict(),

@@ -1,16 +1,34 @@
 import torch
+from torch.nn import Module
+from torch.nn.modules.loss import _Loss
+from torch.optim import Optimizer
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 import utils
 import wandb
-from tqdm import tqdm
-
-
 # training function
-def train(model, model_name, dataloader, optimizer, criterion, train_data, device, log):
+from architectures.model import Model
+from image_dataset import ImageDataset
+
+
+def train(
+        model: Module,
+        model_name: str,
+        dataloader: DataLoader,
+        optimizer: Optimizer,
+        criterion: _Loss,
+        train_data: ImageDataset,
+        device: torch.device,
+        log: bool,
+) -> float:
+
     print('Training')
     model.train()
+
     counter = 0
     train_running_loss = 0.0
+
     for i, data in tqdm(enumerate(dataloader), total=int(len(train_data) / dataloader.batch_size)):
         counter += 1
         img, target = data['image'].to(device), data['label'].to(device)
@@ -45,7 +63,15 @@ def train(model, model_name, dataloader, optimizer, criterion, train_data, devic
 
 
 # validation function
-def validate(model, model_name, dataloader, criterion, val_data, device, log):
+def validate(
+        model: Module,
+        dataloader: DataLoader,
+        criterion: _Loss,
+        val_data: ImageDataset,
+        device: torch.device,
+        log: bool
+) -> (float, float):
+
     print('Validating')
     model.eval()
     counter = 0

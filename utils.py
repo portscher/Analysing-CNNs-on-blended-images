@@ -1,23 +1,20 @@
 import collections
 import os
 from datetime import datetime
+from typing import List, OrderedDict, Any, Dict, Union, Tuple
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
+from torch import Tensor
+from torch.nn.modules.loss import _Loss
 
 
-def log_loss(model_name, epoch, train_epoch_loss, valid_epoch_loss):
-    df = pd.DataFrame({'epoch': epoch, 'train': train_epoch_loss, 'val': valid_epoch_loss}, index=[0])
-    FILENAME = f'{model_name}_loss.csv'
-    # if file does not already exist, write header
-    if not os.path.isfile(FILENAME):
-        df.to_csv(FILENAME)
-    else:  # else it exists, append to existing file without header
-        df.to_csv(FILENAME, mode='a', header=False)
-
-
-def plot_loss(model_name, train_loss, valid_loss):
+def plot_loss(
+        model_name: str,
+        train_loss: List[float],
+        valid_loss: List[float],
+) -> None:
     """
     Plots the loss per epoch of a trained model
     """
@@ -32,8 +29,17 @@ def plot_loss(model_name, train_loss, valid_loss):
     plt.savefig(f'outputs/{model_name}_loss.png')
 
 
-def save_checkpoint(epoch, lr, batch_size, model_state_dict, opt_state_dict, criterion, nclasses, ntrain_imgs,
-                    save_name):
+def save_checkpoint(
+        epoch: int,
+        lr: float,
+        batch_size: int,
+        model_state_dict: OrderedDict[str, Tensor],
+        opt_state_dict: dict,
+        criterion: _Loss,
+        nclasses: int,
+        ntrain_imgs: int,
+        save_name: str
+) -> None:
     """
     Saves a checkpoint/final model to the disk
     """
@@ -53,7 +59,10 @@ def save_checkpoint(epoch, lr, batch_size, model_state_dict, opt_state_dict, cri
     torch.save(checkpoint_dict, f"outputs/{save_name}_{time}_best.pth")
 
 
-def check_if_one_common_element(list1, list2):
+def check_if_one_common_element(
+        list1: List[Any],
+        list2: List[Any]
+) -> bool:
     """
     Compares two lists and checks if they have exactly one element in common
     (For documenting prediction accuracy)
@@ -66,7 +75,11 @@ def check_if_one_common_element(list1, list2):
     return True if count == 1 else False
 
 
-def check_if_both_one_or_none_correct(classes, target_indices, prediction_indices):
+def check_if_both_one_or_none_correct(
+        classes: List[str],
+        target_indices: List[int],
+        prediction_indices: List[int]
+) -> str:
     """
     Compares target and prediction indices and computes whether both predictions,
     one of them or none of them are correct.
@@ -85,14 +98,12 @@ def check_if_both_one_or_none_correct(classes, target_indices, prediction_indice
             return 'incorrect'
 
 
-def which_correct(classes, target_indices, prediction_indices):
-    common_element = list(set(target_indices).intersection(prediction_indices))[0]
-    cl = classes[common_element]
-
-    return hyperclasses(cl)
-
-
-def print_results(both_correct, one_correct, none_correct, hyperclass_dict):
+def print_results(
+        both_correct: int,
+        one_correct: int,
+        none_correct: int,
+        hyperclass_dict: Dict[str, List[Union[int, Tuple[int, int]]]]
+) -> None:
     """
     Prints the results of the prediction
     """
@@ -110,7 +121,8 @@ def print_results(both_correct, one_correct, none_correct, hyperclass_dict):
         total, percentage = v
         print("{:<20} {:<15} {:<15}".format(k, total, percentage))
     print("\n")
-    print("{:<20} {:<15} {:<15} {:<15} {:<15}".format('Combination', 'Both correct', 'One correct', 'Ratio', 'None correct'))
+    print("{:<20} {:<15} {:<15} {:<15} {:<15}".format('Combination', 'Both correct', 'One correct', 'Ratio',
+                                                      'None correct'))
     for k, v in hyperclass_dict.items():
         both, one, none, ratio = v
         new_total = both + one + none
@@ -122,14 +134,24 @@ def print_results(both_correct, one_correct, none_correct, hyperclass_dict):
         tmp_a = ratio[0]
         tmp_b = ratio[1]
         tmp_tot = tmp_a + tmp_b
-        ratio = ('{:.2%}'.format(tmp_a/tmp_tot), '{:.2%}'.format(tmp_b/tmp_tot))
+        ratio = ('{:.2%}'.format(tmp_a / tmp_tot), '{:.2%}'.format(tmp_b / tmp_tot))
         ratio = '{0}'.format(ratio)
 
         print("{:<20} {:<15} {:<13} {:<25} {:<15}".format(k, both, one, ratio, none))
 
 
-def add_results_to_experiment_table(model_name, num_classes, num_training_imgs, num_test_imgs, both_correct,
-                                    one_correct, none_correct, epochs, learning_rate, batch_size):
+def add_results_to_experiment_table(
+        model_name: str,
+        num_classes: int,
+        num_training_imgs: int,
+        num_test_imgs: int,
+        both_correct: int,
+        one_correct: int,
+        none_correct: int,
+        epochs: int,
+        learning_rate: float,
+        batch_size: int
+) -> None:
     """
     Every time a model is tested this function saves the model information and prediction accuracy to a csv file.
     """
@@ -169,13 +191,15 @@ class HyperClass:
     man_made = "ManMade"
 
 
-def hyperclasses(imgclass):
+def hyperclasses(
+        img_class: str
+) -> str:
     MAN_MADE = ['boat', 'car', 'plane', 'chair']
     NATURE = ['flower', 'cat', 'dog']
-    if imgclass in MAN_MADE:
+    if img_class in MAN_MADE:
         # boat, car, chair, plane
         return HyperClass.man_made
-    elif imgclass in NATURE:
+    elif img_class in NATURE:
         # flower, cat, dog
         return HyperClass.nature
     else:
@@ -183,13 +207,33 @@ def hyperclasses(imgclass):
         return HyperClass.human
 
 
-def hyperclass_comb(class1, class2):
+def which_correct(
+        classes: List[str],
+        target_indices: List[int],
+        prediction_indices: List[int]
+) -> str:
+    common_element = list(set(target_indices).intersection(prediction_indices))[0]
+    cl = classes[common_element]
+
+    return hyperclasses(cl)
+
+
+def hyperclass_comb(
+        class1: str,
+        class2: str
+) -> List[str]:
     hyperclass_list = [hyperclasses(class1), hyperclasses(class2)]
     hyperclass_list.sort()
     return hyperclass_list
 
 
-def update_hyperclass_dict(hyperclass_dict, res, which_class, class1, class2):
+def update_hyperclass_dict(
+        hyperclass_dict: Dict[str, List[Union[int, Tuple[int, int]]]],
+        res: str,
+        which_class: str,
+        class1: str,
+        class2: str
+) -> Dict[str, List[Union[int, Tuple[int, int]]]]:
     hyperclass_list = hyperclass_comb(class1, class2)
     dict_entry_name = f"{hyperclass_list[0]}-{hyperclass_list[1]}"
 

@@ -1,7 +1,7 @@
 import collections
 import os
 from datetime import datetime
-from typing import List, OrderedDict, Any, Dict, Union, Tuple
+from typing import List, Any, Dict, Union, Tuple
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -33,7 +33,7 @@ def save_checkpoint(
         epoch: int,
         lr: float,
         batch_size: int,
-        model_state_dict: OrderedDict[str, Tensor],
+        model_state_dict,
         opt_state_dict: dict,
         criterion: _Loss,
         nclasses: int,

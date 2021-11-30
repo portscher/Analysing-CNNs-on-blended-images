@@ -59,6 +59,30 @@ def save_checkpoint(
     torch.save(checkpoint_dict, f"outputs/{save_name}_{time}_best.pth")
 
 
+def save_overview(
+        model_name: str,
+        is_blended: bool,
+        attention: str,
+) -> None:
+    now = datetime.now()
+    dt_string = now.strftime('%d/%m/%Y %H:%M')
+
+    df = pd.DataFrame({'model': model_name,
+                       'time': dt_string,
+                       'isBlended': is_blended,
+                       'attention': attention
+                       }, index=[0])
+
+    FILENAME = 'overview.csv'
+
+    if not os.path.isfile(FILENAME):
+        # if file does not already exist, write header
+        df.to_csv(FILENAME)
+    else:
+        # append to existing file without header
+        df.to_csv(FILENAME, mode='a', header=False)
+
+
 def check_if_one_common_element(
         list1: List[Any],
         list2: List[Any]

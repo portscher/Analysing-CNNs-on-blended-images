@@ -148,6 +148,7 @@ def main():
     if args.wandb:
         wandb.run.finish()
 
+    utils.save_overview(save_name, args.blended, args.attention)
     utils.plot_loss(save_name, train_loss, valid_loss)
 
     del model

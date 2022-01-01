@@ -164,11 +164,79 @@ def print_results(
         print("{:<20} {:<15} {:<13} {:<25} {:<15}".format(k, both, one, ratio, none))
 
 
+def save_hyperclass_results(
+        model_name: str,
+        attention: str,
+        both_correct: int,
+        one_correct: int,
+        none_correct: int,
+        hyperclass_dict: Dict[str, List[Union[int, Tuple[int, int]]]]
+) -> None:
+    total = both_correct + one_correct + none_correct
+    percentage_both = '{:.2%}'.format(both_correct / total)
+    percentage_one = '{:.2%}'.format(one_correct / total)
+    percentage_none = '{:.2%}'.format(none_correct / total)
+
+    all_combos = []
+
+    for k, v in hyperclass_dict.items():
+        both, one, none, ratio = v
+        new_total = both + one + none
+        both = '{:.2%}'.format(both / new_total)
+        one = '{:.2%}'.format(one / new_total)
+        none = '{:.2%}'.format(none / new_total)
+
+        # calculate the ratio in percent
+        tmp_a = ratio[0]
+        tmp_b = ratio[1]
+        tmp_tot = tmp_a + tmp_b
+        ratio = ('{:.2%}'.format(tmp_a / tmp_tot), '{:.2%}'.format(tmp_b / tmp_tot))
+        ratio = '{0}'.format(ratio)
+
+        all_combos.append((both, one, ratio, none))
+
+    # i know, this is horrible, plz don't judge
+    df = pd.DataFrame({'model': model_name,
+                       'attention': attention,
+                       'both correct': percentage_both,
+                       'one correct': percentage_one,
+                       'none correct': percentage_none,
+                       'manmade-manmade both': all_combos[0][0],
+                       'manmade-manmade one': all_combos[0][1],
+                       'manmade-nature both': all_combos[1][0],
+                       'manmade-nature one': all_combos[1][1],
+                       'mn-ratio': all_combos[1][1],
+                       'human-manmade both': all_combos[2][0],
+                       'human-manmade one': all_combos[2][1],
+                       'hm-ratio': all_combos[2][2],
+                       'nature-nature both': all_combos[3][0],
+                       'nature-nature one': all_combos[3][1],
+                       'human-nature both': all_combos[4][0],
+                       'human-nature one': all_combos[4][1],
+                       'hn-ratio': all_combos[4][2]
+                       })
+
+    FILENAME = 'hyperclass_results.csv'
+
+    if not os.path.isfile(FILENAME):
+        # if file does not already exist, write header
+        df.to_csv(FILENAME)
+    else:
+        # append to existing file without header
+        df.to_csv(FILENAME, mode='a', header=False)
+
+
+def count_occurrence_of_classes(csv, classes):
+    class_count = []
+    for c in classes:
+        clsrows = csv.apply(lambda x: True if c in x['image'] else False, axis=1)
+        num_rows = len(clsrows[clsrows == True].index)
+        class_count.append((c, num_rows))
+    return class_count
+
+
 def add_results_to_experiment_table(
         model_name: str,
-        num_classes: int,
-        num_training_imgs: int,
-        num_test_imgs: int,
         both_correct: int,
         one_correct: int,
         none_correct: int,
@@ -192,9 +260,6 @@ def add_results_to_experiment_table(
                        'epochs': epochs,
                        'batch size': batch_size,
                        'learning rate': learning_rate,
-                       '#classes': num_classes,
-                       '#training images': num_training_imgs,
-                       '#test images': num_test_imgs,
                        'both correct': percentage_both,
                        'one correct': percentage_one,
                        'none correct': percentage_none}, index=[0])

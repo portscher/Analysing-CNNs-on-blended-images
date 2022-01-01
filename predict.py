@@ -124,13 +124,11 @@ with torch.no_grad():
 
 utils.print_results(both_correct, one_correct, incorrect, hyperclass_dict)
 
-utils.add_results_to_experiment_table(model_name=args.arch,
-                                      epochs=arch.get_num_epochs(),
-                                      learning_rate=arch.get_learning_rate(),
-                                      batch_size=arch.get_batch_size(),
-                                      num_classes=arch.get_num_classes(),
-                                      num_training_imgs=arch.get_num_train_imgs(),
-                                      num_test_imgs=len(test_set),
-                                      both_correct=both_correct,
-                                      one_correct=one_correct,
-                                      none_correct=incorrect)
+occurrences = utils.count_occurrence_of_classes(test_csv, classes)
+
+utils.save_hyperclass_results(model_name=args.arch,
+                              attention=args.attention,
+                              both_correct=both_correct,
+                              one_correct=one_correct,
+                              none_correct=incorrect,
+                              hyperclass_dict=hyperclass_dict)

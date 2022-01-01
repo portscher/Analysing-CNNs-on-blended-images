@@ -214,7 +214,7 @@ def save_hyperclass_results(
                        'human-nature both': all_combos[4][0],
                        'human-nature one': all_combos[4][1],
                        'hn-ratio': all_combos[4][2]
-                       })
+                       }, index=[0])
 
     FILENAME = 'hyperclass_results.csv'
 

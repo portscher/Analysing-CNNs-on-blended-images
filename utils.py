@@ -205,7 +205,7 @@ def save_hyperclass_results(
                        'manmade-manmade one': all_combos[0][1],
                        'manmade-nature both': all_combos[1][0],
                        'manmade-nature one': all_combos[1][1],
-                       'mn-ratio': all_combos[1][1],
+                       'mn-ratio': all_combos[1][2],
                        'human-manmade both': all_combos[2][0],
                        'human-manmade one': all_combos[2][1],
                        'hm-ratio': all_combos[2][2],

@@ -110,7 +110,7 @@ for i, lFilter in enumerate(model_weights[0]):
     lFilter = lFilter.cpu()
     plt.imshow(lFilter[0, :, :].detach(), cmap='gray')
     plt.axis('off')
-    plt.savefig(f'../filters/{args.arch.lower()}.png')
+    plt.savefig(f'filters/{args.arch.lower()}.png')
     plt.show()
 
 # layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()

@@ -99,21 +99,21 @@ for i in range(len(model_children)):
                     conv_layers.append(child)
 print(f"Total convolutional layers: {counter}")
 
-plt.figure(figsize=(20, 17))
 # take a look at the conv layers and the respective weights
 for weight, conv in zip(model_weights, conv_layers):
     print(len(conv_layers))
     print(f"CONV: {conv} ====> SHAPE: {weight.shape}")
 
-    for i, lFilter in enumerate(weight):
-        filtersize = weight.shape[2]
-        plt.subplot(filtersize, filtersize, i + 1)  # (8, 8) because in conv0 we have 7x7 filters and total of 64
+for j in range(len(conv_layers)):
+    for i, lFilter in enumerate(model_weights[j]):
+        plt.figure(figsize=(20, 17))
+        filtersize = model_weights[j].shape[2]
+        plt.subplot(filtersize + 1, filtersize + 1, i + 1)
         lFilter = lFilter.cpu()
         plt.imshow(lFilter[0, :, :].detach())
         plt.axis('off')
-        plt.savefig(f'filters/{args.arch.lower()}.png')
+        plt.savefig(f'filters/{args.arch.lower()}_{j}.png')
         plt.clf()
-
 
 # layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()
 # print(layer_filter.size())

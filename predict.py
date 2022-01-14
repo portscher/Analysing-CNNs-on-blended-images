@@ -112,6 +112,7 @@ for weight, conv in zip(model_weights, conv_layers):
         plt.imshow(lFilter[0, :, :].detach())
         plt.axis('off')
         plt.savefig(f'filters/{args.arch.lower()}_layer{i}.png')
+        plt.clf()
 
 
 # layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()

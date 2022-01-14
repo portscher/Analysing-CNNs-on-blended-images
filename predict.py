@@ -114,13 +114,8 @@ counter = 0
 # plt.show()
 
 # Visualize conv filter
-kernels = arch.conv1.weight.detach()
-fig, axarr = plt.subplots(kernels.size(0))
-#for idx in range(kernels.size(0)):
-#    axarr[idx].imshow(kernels[idx].squeeze())
 
-
-kernels = arch.conv1.weight.detach().cpu()
+kernels = arch.conv2.weight.detach().cpu()
 print(kernels.size())
 utils.visualize_tensor(kernels, args.arch.lower(), ch=0, allkernels=False)
 

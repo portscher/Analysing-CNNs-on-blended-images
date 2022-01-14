@@ -347,7 +347,7 @@ def update_hyperclass_dict(
 
 
 # from https://stackoverflow.com/a/55604568
-def visualize_tensor(tensor, model_name, ch=0, allkernels=False, nrow=8, padding=1):
+def visualize_tensor(tensor, model_name, layernum,  ch=0, allkernels=False, nrow=8, padding=1):
     n, c, w, h = tensor.shape
 
     if allkernels:
@@ -361,4 +361,4 @@ def visualize_tensor(tensor, model_name, ch=0, allkernels=False, nrow=8, padding
     plt.imshow(grid.numpy().transpose((1, 2, 0)))
     plt.axis('off')
     plt.ioff()
-    plt.savefig(f'filters/{model_name}_filters.png')
+    plt.savefig(f'filters/{model_name}_filters_{layernum}.png')

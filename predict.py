@@ -117,7 +117,7 @@ counter = 0
 
 kernels = arch.conv2.weight.detach().cpu()
 print(kernels.size())
-utils.visualize_tensor(kernels, args.arch.lower(), ch=0, allkernels=False)
+utils.visualize_tensor(kernels, args.arch.lower(), 2, ch=0, allkernels=False)
 
 ###################################################################################################################
 # Start prediction and process results

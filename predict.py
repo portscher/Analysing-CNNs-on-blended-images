@@ -115,9 +115,9 @@ counter = 0
 
 # Visualize conv filter
 
-kernels = arch.layer1[0].conv2.weight.detach().cpu()
+kernels = arch.layer1[0].conv3.weight.detach().cpu()
 print(kernels.size())
-utils.visualize_tensor(kernels, args.arch.lower(), 2, ch=0, allkernels=False)
+utils.visualize_tensor(kernels, args.arch.lower(), 3, ch=0, allkernels=False)
 
 ###################################################################################################################
 # Start prediction and process results

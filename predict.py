@@ -115,7 +115,7 @@ counter = 0
 
 # Visualize conv filter
 
-kernels = arch.conv2.weight.detach().cpu()
+kernels = arch.layer1[0].conv2.weight.detach().cpu()
 print(kernels.size())
 utils.visualize_tensor(kernels, args.arch.lower(), 2, ch=0, allkernels=False)
 

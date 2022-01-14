@@ -107,14 +107,15 @@ for weight, conv in zip(model_weights, conv_layers):
 plt.figure(figsize=(20, 17))
 for i, lFilter in enumerate(model_weights[0]):
     plt.subplot(8, 8, i + 1)  # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
+    lFilter = lFilter.cpu()
     plt.imshow(lFilter[0, :, :].detach(), cmap='gray')
     plt.axis('off')
     plt.savefig(f'../filters/{args.arch.lower()}.png')
     plt.show()
 
-layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()
-print(layer_filter.size())
-utils.visualize_tensor(layer_filter, args.arch.lower(), ch=0, allkernels=False)
+# layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()
+# print(layer_filter.size())
+# utils.visualize_tensor(layer_filter, args.arch.lower(), ch=0, allkernels=False)
 
 ###################################################################################################################
 # Start prediction and process results

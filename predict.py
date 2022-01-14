@@ -102,7 +102,6 @@ print(f"Total convolutional layers: {counter}")
 plt.figure(figsize=(20, 17))
 # take a look at the conv layers and the respective weights
 for weight, conv in zip(model_weights, conv_layers):
-    print(f"WEIGHT: {weight} \nSHAPE: {weight.shape}")
     print(f"CONV: {conv} ====> SHAPE: {weight.shape}")
 
     for i, lFilter in enumerate(weight):
@@ -111,7 +110,7 @@ for weight, conv in zip(model_weights, conv_layers):
         lFilter = lFilter.cpu()
         plt.imshow(lFilter[0, :, :].detach())
         plt.axis('off')
-        plt.savefig(f'filters/{args.arch.lower()}_layer{i}.png')
+        plt.savefig(f'filters/{args.arch.lower()}.png')
         plt.clf()
 
 

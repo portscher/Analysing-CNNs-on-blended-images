@@ -3,6 +3,8 @@ import sys
 
 import pandas as pd
 import torch
+from matplotlib import pyplot as plt
+from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -16,7 +18,8 @@ from architectures import resnet50, inception_v3, cornet_z, cornet_s, resnet18, 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--arch', help='<Required> Which model to use', required=True,
-                    choices=['resnet18', 'resnet50', 'inception', 'efficientnet', 'cornet_z', 'cornet_s', 'vision_transformer'])
+                    choices=['resnet18', 'resnet50', 'inception', 'efficientnet', 'cornet_z', 'cornet_s',
+                             'vision_transformer'])
 parser.add_argument('--path', required=True)
 parser.add_argument('--blended', action='store_true')
 parser.add_argument('--attention', choices=['cbam', 'aacn', 'none'], default='none')
@@ -48,7 +51,6 @@ else:
 test_set = image_dataset.ImageDataset(csv=test_csv, directory=args.test_folder, set_type='test', img_size=img_size)
 test_loader = DataLoader(test_set, batch_size=1, shuffle=False)
 
-
 ###################################################################################################################
 # Initialize the model architecture
 ###################################################################################################################
@@ -74,10 +76,45 @@ arch = arch.get_model().to(device)
 ###################################################################################################################
 # Visualize and save filters
 ###################################################################################################################
-for i, module in enumerate(arch.modules()):
-    layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()
-    print(layer_filter.size())
-    utils.visualize_tensor(layer_filter, args.arch.lower(), ch=0, allkernels=False)
+model_weights = []  # we will save the conv layer weights in this list
+conv_layers = []  # we will save the 49 conv layers in this list
+
+# get all the model children as list
+model_children = list(arch.children())
+
+# counter to keep count of the conv layers
+counter = 0
+# append all the conv layers and their respective weights to the list
+for i in range(len(model_children)):
+    if type(model_children[i]) == nn.Conv2d:
+        counter += 1
+        model_weights.append(model_children[i].weight)
+        conv_layers.append(model_children[i])
+    elif type(model_children[i]) == nn.Sequential:
+        for j in range(len(model_children[i])):
+            for child in model_children[i][j].children():
+                if type(child) == nn.Conv2d:
+                    counter += 1
+                    model_weights.append(child.weight)
+                    conv_layers.append(child)
+print(f"Total convolutional layers: {counter}")
+
+# take a look at the conv layers and the respective weights
+for weight, conv in zip(model_weights, conv_layers):
+    # print(f"WEIGHT: {weight} \nSHAPE: {weight.shape}")
+    print(f"CONV: {conv} ====> SHAPE: {weight.shape}")
+
+plt.figure(figsize=(20, 17))
+for i, lFilter in enumerate(model_weights[0]):
+    plt.subplot(8, 8, i + 1)  # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
+    plt.imshow(lFilter[0, :, :].detach(), cmap='gray')
+    plt.axis('off')
+    plt.savefig(f'../filters/{args.arch.lower()}.png')
+    plt.show()
+
+layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()
+print(layer_filter.size())
+utils.visualize_tensor(layer_filter, args.arch.lower(), ch=0, allkernels=False)
 
 ###################################################################################################################
 # Start prediction and process results

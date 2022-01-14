@@ -74,8 +74,9 @@ arch = arch.get_model().to(device)
 ###################################################################################################################
 # Visualize and save filters
 ###################################################################################################################
-for module in arch.modules():
-    layer_filter = module.weight.data.clone()
+for i, module in enumerate(arch.modules()):
+    layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()
+    print(layer_filter.size())
     utils.visualize_tensor(layer_filter, args.arch.lower(), ch=0, allkernels=False)
 
 ###################################################################################################################

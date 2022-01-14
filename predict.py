@@ -29,7 +29,7 @@ if not args.arch or not args.test_folder:
     sys.exit()
 
 ###################################################################################################################
-# Load model and test data
+# Load test data
 ###################################################################################################################
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -48,9 +48,12 @@ else:
 test_set = image_dataset.ImageDataset(csv=test_csv, directory=args.test_folder, set_type='test', img_size=img_size)
 test_loader = DataLoader(test_set, batch_size=1, shuffle=False)
 
+
+###################################################################################################################
+# Initialize the model architecture
+###################################################################################################################
 arch = None
-num_classes = 0
-# initialize the model architecture
+
 if args.arch.lower() == 'resnet18':
     arch = resnet18.ResNet18(path=args.path, train_from_scratch=False, attention=args.attention)
 elif args.arch.lower() == 'resnet50':
@@ -68,13 +71,20 @@ elif args.arch.lower() == 'vision_transformer':
 
 arch = arch.get_model().to(device)
 
-both_correct = 0
-one_correct = 0
-incorrect = 0
+###################################################################################################################
+# Visualize and save filters
+###################################################################################################################
+for module in arch.modules():
+    layer_filter = module.weight.data.clone()
+    utils.visualize_tensor(layer_filter, args.arch.lower(), ch=0, allkernels=False)
 
 ###################################################################################################################
 # Start prediction and process results
 ###################################################################################################################
+
+both_correct = 0
+one_correct = 0
+incorrect = 0
 
 FILENAME = 'buffer.txt'
 hyperclass_dict = {'ManMade-ManMade': [0, 0, 0, (0, 0)], 'ManMade-Nature': [0, 0, 0, (0, 0)],
@@ -123,8 +133,6 @@ with torch.no_grad():
     print(f"Correct: {both_correct}, total: {total}, validation accuracy: {(100 * both_correct / total):.4f}")
 
 utils.print_results(both_correct, one_correct, incorrect, hyperclass_dict)
-
-occurrences = utils.count_occurrence_of_classes(test_csv, classes)
 
 utils.save_hyperclass_results(model_name=args.arch,
                               attention=args.attention,

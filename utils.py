@@ -4,10 +4,11 @@ from datetime import datetime
 from typing import List, Any, Dict, Union, Tuple
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import torch
-from torch import Tensor
 from torch.nn.modules.loss import _Loss
+from torchvision import utils
 
 
 def plot_loss(
@@ -342,3 +343,21 @@ def update_hyperclass_dict(
 
     hyperclass_dict.update([(dict_entry_name, tmp_list)])
     return hyperclass_dict
+
+
+# from https://stackoverflow.com/a/55604568
+def visualize_tensor(tensor, model_name, ch=0, allkernels=False, nrow=8, padding=1):
+    n, c, w, h = tensor.shape
+
+    if allkernels:
+        tensor = tensor.view(n * c, -1, w, h)
+    elif c != 3:
+        tensor = tensor[:, ch, :, :].unsqueeze(dim=1)
+
+    rows = np.min((tensor.shape[0] // nrow + 1, 64))
+    grid = utils.make_grid(tensor, nrow=nrow, normalize=True, padding=padding)
+    plt.figure(figsize=(nrow, rows))
+    plt.imshow(grid.numpy().transpose((1, 2, 0)))
+    plt.axis('off')
+    plt.ioff()
+    plt.savefig(f'filters/{model_name}_filters.png')

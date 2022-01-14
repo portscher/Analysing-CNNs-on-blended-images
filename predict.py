@@ -107,13 +107,14 @@ for weight, conv in zip(model_weights, conv_layers):
 plt.figure(figsize=(20, 17))
 for m in model_weights:
     for i, lFilter in enumerate(m):
-        filtersize = m.shape[2]
-        plt.subplot(filtersize, filtersize, i + 1)  # (8, 8) because in conv0 we have 7x7 filters and total of 64
-        lFilter = lFilter.cpu()
-        plt.imshow(lFilter[0, :, :].detach())
-        plt.axis('off')
-        plt.savefig(f'filters/{args.arch.lower()}.png')
-        plt.show()
+        if i < 50:
+            filtersize = m.shape[2]
+            plt.subplot(filtersize, filtersize, i + 1)  # (8, 8) because in conv0 we have 7x7 filters and total of 64
+            lFilter = lFilter.cpu()
+            plt.imshow(lFilter[0, :, :].detach())
+            plt.axis('off')
+            plt.savefig(f'filters/{args.arch.lower()}_layer{i}.png')
+            plt.show()
 
 # layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()
 # print(layer_filter.size())

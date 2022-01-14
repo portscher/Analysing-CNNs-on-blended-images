@@ -24,6 +24,9 @@ parser.add_argument('--path', required=True)
 parser.add_argument('--blended', action='store_true')
 parser.add_argument('--attention', choices=['cbam', 'aacn', 'none'], default='none')
 parser.add_argument('--test_folder', required=True)
+parser.add_argument('--layer', type=int, required=True)
+parser.add_argument('--fsize', type=int, required=True)
+
 
 args = parser.parse_args()
 
@@ -104,16 +107,13 @@ for weight, conv in zip(model_weights, conv_layers):
     print(len(conv_layers))
     print(f"CONV: {conv} ====> SHAPE: {weight.shape}")
 
-for j in range(len(conv_layers)):
-    for i, lFilter in enumerate(model_weights[j]):
-        plt.figure(figsize=(20, 17))
-        filtersize = model_weights[j].shape[2]
-        plt.subplot(filtersize + 1, filtersize + 1, i + 1)
-        lFilter = lFilter.cpu()
-        plt.imshow(lFilter[0, :, :].detach())
-        plt.axis('off')
-        plt.savefig(f'filters/{args.arch.lower()}_{j}.png')
-        plt.clf()
+plt.figure(figsize=(20, 17))
+for i, filter in enumerate(model_weights[args.layer]):
+    plt.subplot(args.fsize, args.fsize, i + 1)  # we have 5x5 filters and total of 16 (see printed shapes)
+    plt.imshow(filter[0, :, :].detach().cpu().numpy(), cmap='viridis')
+    plt.axis('off')
+    plt.savefig(f'filters/{args.arch.lower()}_layer_{args.layer}.png')
+plt.show()
 
 # layer_filter = arch.Conv2d_1a_3x3.weight.detach().clone()
 # print(layer_filter.size())

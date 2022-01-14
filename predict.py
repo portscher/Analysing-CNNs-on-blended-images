@@ -24,8 +24,6 @@ parser.add_argument('--path', required=True)
 parser.add_argument('--blended', action='store_true')
 parser.add_argument('--attention', choices=['cbam', 'aacn', 'none'], default='none')
 parser.add_argument('--test_folder', required=True)
-parser.add_argument('--layer', type=int, required=True)
-parser.add_argument('--fsize', type=int, required=True)
 
 
 args = parser.parse_args()
@@ -122,7 +120,7 @@ fig, axarr = plt.subplots(kernels.size(0))
 #    axarr[idx].imshow(kernels[idx].squeeze())
 
 
-kernels = arch.conv1.weight.detach()
+kernels = arch.conv1.weight.detach().cpu()
 print(kernels.size())
 utils.visualize_tensor(kernels, args.arch.lower(), ch=0, allkernels=False)
 

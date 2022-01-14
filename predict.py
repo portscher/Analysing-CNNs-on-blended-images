@@ -102,6 +102,7 @@ print(f"Total convolutional layers: {counter}")
 plt.figure(figsize=(20, 17))
 # take a look at the conv layers and the respective weights
 for weight, conv in zip(model_weights, conv_layers):
+    print(len(conv_layers))
     print(f"CONV: {conv} ====> SHAPE: {weight.shape}")
 
     for i, lFilter in enumerate(weight):

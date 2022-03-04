@@ -23,7 +23,7 @@ class ResNet18(Model):
             # adjust the classification layer to classify 8 object types
             model.fc = nn.Linear(512, 8)
         elif self.attention == 'aacn':
-            model = AACN_ResNet.resnet18(num_classes=8, attention=[False, True, True, True], num_heads=4, k=2, v=0.25, image_size=224)
+            model = AACN_ResNet.resnet18(num_classes=8, attention=[False, True, True, True], num_heads=8, k=2, v=0.25, image_size=224)
         elif self.attention == 'cbam':
             model = resnet_att.ResidualNet(18, 8, att_type='CBAM')
 

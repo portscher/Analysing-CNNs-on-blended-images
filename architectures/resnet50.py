@@ -20,7 +20,7 @@ class ResNet50(Model):
         if self.attention == 'cbam':
             raise NotImplementedError('CBAM not yet implemented for ResNet50')
         elif self.attention == 'aacn':
-            model = AACN_ResNet.resnet50(num_classes=8, attention=[False, True, True, True], num_heads=4, k=2, v=0.25, image_size=224)
+            model = AACN_ResNet.resnet50(num_classes=8, attention=[False, True, True, True], num_heads=8, k=2, v=0.25, image_size=224)
         else:
             model = models.resnet50(progress=True)
             # adjust the classification layer to classify 8 object types

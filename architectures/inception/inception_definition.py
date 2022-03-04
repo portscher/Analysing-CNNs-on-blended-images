@@ -382,7 +382,7 @@ class InceptionE(nn.Module):
         if attention == 'none':
             self.branch3x3dbl_2 = conv_block(448, 384, kernel_size=3, padding=1)
         elif attention == 'aacn':
-            self.branch3x3dbl_2 = AttentionConv2d(448, 384, image_size=img_size, num_heads=4)
+            self.branch3x3dbl_2 = AttentionConv2d(448, 384, image_size=img_size, num_heads=8)
 
         self.branch3x3dbl_3a = conv_block(384, 384, kernel_size=(1, 3), padding=(0, 1))
         self.branch3x3dbl_3b = conv_block(384, 384, kernel_size=(3, 1), padding=(1, 0))
@@ -476,7 +476,7 @@ class AttentionConv2d(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, image_size: int, num_heads: int, stride: int = 1) -> None:
         super().__init__()
         self.conv = AACN_Layer(in_channels=in_channels, out_channels=out_channels, image_size=image_size,
-                               num_heads=num_heads, dk=40, dv=4)
+                               num_heads=8, dk=40, dv=4)
         self.bn = nn.BatchNorm2d(out_channels, eps=0.001)
 
     def forward(self, x: Tensor) -> Tensor:

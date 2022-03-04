@@ -64,7 +64,7 @@ class CORblock_Z(nn.Module):
                                   stride=(stride, stride), padding=kernel_size // 2)
         else:
             self.conv = AACN_Layer(in_channels=in_channels, out_channels=out_channels, dk=40, dv=4,
-                                   kernel_size=kernel_size, num_heads=4, image_size=img_size, inference=False)
+                                   kernel_size=kernel_size, num_heads=8, image_size=img_size, inference=False)
 
         self.nonlin = nn.ReLU(inplace=True)
         self.pool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)

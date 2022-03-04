@@ -476,7 +476,7 @@ class AttentionConv2d(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, image_size: int, num_heads: int, stride: int = 1) -> None:
         super().__init__()
         self.conv = AACN_Layer(in_channels=in_channels, out_channels=out_channels, image_size=image_size,
-                               num_heads=8, dk=40, dv=4)
+                               num_heads=8, dk=32, dv=32)
         self.bn = nn.BatchNorm2d(out_channels, eps=0.001)
 
     def forward(self, x: Tensor) -> Tensor:

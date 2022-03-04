@@ -55,7 +55,7 @@ class BasicBlock(nn.Module):
             self.conv2 = conv3x3(planes, planes)
         else:
             width = int(planes * (base_width / 64.)) * groups
-            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3,
+            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=32, dv=32, kernel_size=3,
                                     num_heads=num_heads, image_size=image_size, inference=inference)
         self.bn2 = norm_layer(planes)
         self.downsample = downsample
@@ -81,7 +81,7 @@ class BasicBlock(nn.Module):
 
 
 class Bottleneck(nn.Module):
-    # Bottleneck in torchvision places the stride for downsampling at 3x3 convolution(self.conv2)
+    # Bottleneck in torchvision places the stride for down sampling at 3x3 convolution(self.conv2)
     # while original implementation places the stride at the first 1x1 convolution(self.conv1)
     # according to "Deep residual learning for image recognition"https://arxiv.org/abs/1512.03385.
     # This variant is also known as ResNet V1.5 and improves accuracy according to
@@ -116,7 +116,7 @@ class Bottleneck(nn.Module):
         if not attention:
             self.conv2 = conv3x3(planes, planes)
         else:
-            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=40, dv=4, kernel_size=3,
+            self.conv2 = AACN_Layer(in_channels=width, out_channels=width, dk=32, dv=32, kernel_size=3,
                                     num_heads=num_heads, image_size=image_size, inference=inference)
         self.bn2 = norm_layer(width)
         self.conv3 = conv1x1(width, planes * self.expansion)

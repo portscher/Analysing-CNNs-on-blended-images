@@ -23,7 +23,7 @@ def adjust_learning_rate(
     """
     Sets the learning rate to the initial LR decayed by 10 every 20 epochs
     """
-    lr = learning_rate * (0.1 ** (epoch // 20))
+    lr = learning_rate * (0.1 ** (epoch // 18))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
     print(f"LR: {lr}")
@@ -83,12 +83,12 @@ def main():
 
     if args.blended:
         if args.attention == 'cbam':
-            save_name = f"{arch}_cbam_blended"
+            save_name = f"{arch}_cbam_blended2"
         elif args.attention == 'aacn':
-            save_name = f"{arch}_aacn_blended"
+            save_name = f"{arch}_aacn_blended2"
         else:
-            save_name = f"{arch}_blended"
-        base = "../blended_dataset/"
+            save_name = f"{arch}_blended2"
+        base = "../2blended_dataset/"
         csv_base = "../csv/blended/"
     else:
         if args.attention == 'cbam':
@@ -111,11 +111,11 @@ def main():
     # Prepare data for training
     ###################################################################################################################
 
-    train_csv = pd.read_csv(f'{csv_base}train.csv')
+    train_csv = pd.read_csv(f'{csv_base}train2.csv')
     train_set = image_dataset.ImageDataset(train_csv, base, 'train', img_size)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-    val_csv = pd.read_csv(f'{csv_base}val.csv')
+    val_csv = pd.read_csv(f'{csv_base}val2.csv')
     valid_set = image_dataset.ImageDataset(val_csv, base, 'val', img_size)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, pin_memory=True)
 

@@ -17,8 +17,6 @@ class EfficientNetB0(Model):
     def get_model(self):
         if self.attention == 'aacn':
             model = EfficientNet(num_classes=8, attention=True)
-        elif self.attention == 'cbam':
-            raise NotImplementedError('CBAM not yet implemented for EfficientNet')
         else:
             model = EfficientNet(num_classes=8, attention=False)
 

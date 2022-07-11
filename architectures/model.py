@@ -5,10 +5,11 @@ import torch
 
 class Model:
 
-    def __init__(self, path, train_from_scratch, attention):
+    def __init__(self, path, train_from_scratch, attention, heads):
         self.path = path
         self.train_from_scratch = train_from_scratch
         self.attention = attention
+        self.heads = heads
 
     def get_model(self):
         """

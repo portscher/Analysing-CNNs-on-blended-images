@@ -23,7 +23,7 @@ InceptionOutputs.__annotations__ = {'logits': Tensor, 'aux_logits': Optional[Ten
 _InceptionOutputs = InceptionOutputs
 
 
-def inception_v3(pretrained: bool = False, progress: bool = True, attention: str = 'none',
+def inception_v3(pretrained: bool = False, progress: bool = True, attention: str = 'none', heads: int = 4,
                  **kwargs: Any) -> "Inception3":
     r"""Inception v3 model architecture from
     `"Rethinking the Inception Architecture for Computer Vision" <http://arxiv.org/abs/1512.00567>`_.
@@ -36,9 +36,9 @@ def inception_v3(pretrained: bool = False, progress: bool = True, attention: str
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
         attention (str): Attention
+        heads (int): Number of attention heads
     """
-    print(attention)
-    return Inception3(attention, **kwargs)
+    return Inception3(attention, heads, **kwargs)
 
 
 class Inception3(nn.Module):
@@ -46,6 +46,7 @@ class Inception3(nn.Module):
     def __init__(
             self,
             attention,
+            heads: int = 4,
             num_classes: int = 8,
             aux_logits: bool = True,
             transform_input: bool = False,
@@ -95,8 +96,8 @@ class Inception3(nn.Module):
         if aux_logits:
             self.AuxLogits = inception_aux(768, num_classes)
         self.Mixed_7a = inception_d(768)
-        self.Mixed_7b = inception_e(1280, attention=self.attention, img_size=8)
-        self.Mixed_7c = inception_e(2048, attention=self.attention, img_size=8)
+        self.Mixed_7b = inception_e(1280, attention=self.attention, heads=heads, img_size=8)
+        self.Mixed_7c = inception_e(2048, attention=self.attention, heads=heads, img_size=8)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.dropout = nn.Dropout()
         self.fc = nn.Linear(2048, num_classes)
@@ -213,7 +214,7 @@ class InceptionA(nn.Module):
         self.branch3x3dbl_1 = conv_block(in_channels, 64, kernel_size=1)
         self.branch3x3dbl_2 = conv_block(64, 96, kernel_size=3, padding=1)
         self.branch3x3dbl_3 = conv_block(96, 96, kernel_size=3,
-                                         padding=1)  # AttentionConv2d(96, 96, image_size=35, num_heads=4)
+                                         padding=1)
 
         self.branch_pool = conv_block(in_channels, pool_features, kernel_size=1)
 
@@ -333,9 +334,6 @@ class InceptionD(nn.Module):
             conv_block = BasicConv2d
         self.branch3x3_1 = conv_block(in_channels, 192, kernel_size=1)
         self.branch3x3_2 = conv_block(192, 320, kernel_size=3, stride=2)
-        # if attention == 'aacn':
-        #    self.branch3x3_2 = AttentionConv2d(192, 320, image_size=img_size, num_heads=4, stride=2)
-
         self.branch7x7x3_1 = conv_block(in_channels, 192, kernel_size=1)
         self.branch7x7x3_2 = conv_block(192, 192, kernel_size=(1, 7), padding=(0, 3))
         self.branch7x7x3_3 = conv_block(192, 192, kernel_size=(7, 1), padding=(3, 0))
@@ -365,6 +363,7 @@ class InceptionE(nn.Module):
             self,
             in_channels: int,
             attention: str,
+            heads: int,
             img_size: int,
             conv_block: Optional[Callable[..., nn.Module]] = None
     ) -> None:
@@ -382,7 +381,7 @@ class InceptionE(nn.Module):
         if attention == 'none':
             self.branch3x3dbl_2 = conv_block(448, 384, kernel_size=3, padding=1)
         elif attention == 'aacn':
-            self.branch3x3dbl_2 = AttentionConv2d(448, 384, image_size=img_size, num_heads=8)
+            self.branch3x3dbl_2 = AttentionConv2d(448, 384, image_size=img_size, num_heads=heads)
 
         self.branch3x3dbl_3a = conv_block(384, 384, kernel_size=(1, 3), padding=(0, 1))
         self.branch3x3dbl_3b = conv_block(384, 384, kernel_size=(3, 1), padding=(1, 0))
@@ -476,7 +475,7 @@ class AttentionConv2d(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, image_size: int, num_heads: int, stride: int = 1) -> None:
         super().__init__()
         self.conv = AACN_Layer(in_channels=in_channels, out_channels=out_channels, image_size=image_size,
-                               num_heads=8, dk=32, dv=32)
+                               num_heads=num_heads, dk=32, dv=32)
         self.bn = nn.BatchNorm2d(out_channels, eps=0.001)
 
     def forward(self, x: Tensor) -> Tensor:

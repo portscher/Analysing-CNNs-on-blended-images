@@ -22,7 +22,7 @@ parser.add_argument('--arch', help='<Required> Which model to use', required=Tru
                              'vision_transformer'])
 parser.add_argument('--path', required=True)
 parser.add_argument('--blended', action='store_true')
-parser.add_argument('--attention', choices=['cbam', 'aacn', 'none'], default='none')
+parser.add_argument('--attention', choices=['aacn', 'none'], default='none')
 parser.add_argument('--test_folder', required=True)
 
 

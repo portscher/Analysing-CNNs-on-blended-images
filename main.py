@@ -37,7 +37,8 @@ def main():
     parser.add_argument('--arch', required=True,
                         choices=['resnet18', 'resnet50', 'inception', 'efficientnet', 'cornet_z', 'cornet_s',
                                  'vision_transformer'])
-    parser.add_argument('--attention', choices=['cbam', 'aacn', 'none'], default='none')
+    parser.add_argument('--attention', choices=['aacn', 'none'], default='none')
+    parser.add_argument('--heads', type=int, default=4)
     parser.add_argument('--blended', action='store_true')
     parser.add_argument('--batch_size', type=int, default=128)
     parser.add_argument('--epochs', type=int, default=70)
@@ -57,16 +58,16 @@ def main():
     learning_rate = args.lr
 
     if arch == 'resnet50':
-        model = resnet50.ResNet50(attention=args.attention).get_model().to(device)
+        model = resnet50.ResNet50(attention=args.attention, heads=args.heads).get_model().to(device)
     elif arch == 'resnet18':
-        model = resnet18.ResNet18(attention=args.attention).get_model().to(device)
+        model = resnet18.ResNet18(attention=args.attention, heads=args.heads).get_model().to(device)
     elif arch == 'inception':
-        model = inception_v3.Inception(attention=args.attention).get_model().to(device)
+        model = inception_v3.Inception(attention=args.attention, heads=args.heads).get_model().to(device)
         img_size = 299
     elif arch == 'efficientnet':
         model = efficientnet_b0.EfficientNetB0(attention=args.attention).get_model().to(device)
     elif arch == 'cornet_z':
-        model = cornet_z.CORnet(attention=args.attention).get_model().to(device)
+        model = cornet_z.CORnet(attention=args.attention, heads=args.heads).get_model().to(device)
     elif arch == 'cornet_s':
         model = cornet_s.CORnet(attention=args.attention).get_model().to(device)
     elif arch == 'vision_transformer':
@@ -82,23 +83,19 @@ def main():
     summary(model, input_size=(batch_size, 3, img_size, img_size), depth=4, verbose=1)
 
     if args.blended:
-        if args.attention == 'cbam':
-            save_name = f"{arch}_cbam_blended2"
-        elif args.attention == 'aacn':
-            save_name = f"{arch}_aacn_blended2"
+        if args.attention == 'aacn':
+            save_name = f"{arch}_aacn_blended"
         else:
-            save_name = f"{arch}_blended2"
-        base = "../2blended_dataset/"
-        csv_base = "../csv/blended/"
+            save_name = f"{arch}_blended"
+        base = "blended/"
+        csv_base = "csv/blended/"
     else:
-        if args.attention == 'cbam':
-            save_name = f"{arch}_cbam"
-        elif args.attention == 'aacn':
+        if args.attention == 'aacn':
             save_name = f"{arch}_aacn"
         else:
             save_name = arch
-        base = "../dataset/train/"
-        csv_base = "../csv/"
+        base = "reg/"
+        csv_base = "csv/reg/"
 
     if args.wandb:
         wandb.init(project=arch,
@@ -111,11 +108,11 @@ def main():
     # Prepare data for training
     ###################################################################################################################
 
-    train_csv = pd.read_csv(f'{csv_base}train2.csv')
+    train_csv = pd.read_csv(f'{csv_base}train.csv')
     train_set = image_dataset.ImageDataset(train_csv, base, 'train', img_size)
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, pin_memory=True)
 
-    val_csv = pd.read_csv(f'{csv_base}val2.csv')
+    val_csv = pd.read_csv(f'{csv_base}val.csv')
     valid_set = image_dataset.ImageDataset(val_csv, base, 'val', img_size)
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, pin_memory=True)
 

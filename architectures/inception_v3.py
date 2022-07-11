@@ -9,18 +9,17 @@ from architectures.model import Model
 
 class Inception(Model):
 
-    def __init__(self, train_from_scratch=True, path=None, attention='none'):
+    def __init__(self, train_from_scratch=True, path=None, attention='none', heads=4):
 
-        super().__init__(path, train_from_scratch, attention)
+        super().__init__(path, train_from_scratch, attention, heads)
         self.train_from_scratch = train_from_scratch
         self.path = path
         self.attention = attention
+        self.heads = heads
 
     def get_model(self):
         if self.attention == 'aacn':
             model = inception_definition.inception_v3(pretrained=False, progress=True, attention='aacn')
-        elif self.attention == 'cbam':
-            raise NotImplementedError('CBAM not yet implemented for Inception')
         else:
             model = inception_definition.inception_v3(pretrained=False, progress=True, attention='none')
 

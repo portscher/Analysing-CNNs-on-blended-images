@@ -56,11 +56,11 @@ main folder
 ```
 ### Training a network from scratch
 ```
-python3 main.py [-h] --arch {resnet18,resnet50,inception,efficientnet,cornet_z,cornet_s,vision_transformer} [--attention {aacn,none}] [--blended] [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--lr LR]
+python3 main.py [-h] --arch {resnet18,resnet50,inception,efficientnet,cornet_z,cornet_s,vision_transformer} [--attention {aacn,none}] [--heads NUM_HEADS] [--blended] [--batch_size BATCH_SIZE] [--epochs EPOCHS] [--lr LR]
 
 ```
 ### Predicting
 ```
-python3 predict.py [-h] --arch {resnet18,resnet50,inception,efficientnet,cornet_z,cornet_s,vision_transformer} --path PATH [--blended] [--attention {aacn,none}] --test_folder TEST_FOLDER
+python3 predict.py [-h] --arch {resnet18,resnet50,inception,efficientnet,cornet_z,cornet_s,vision_transformer} --path PATH [--blended] [--attention {aacn,none}] [--heads NUM_HEADS] --test_folder TEST_FOLDER
 
 ```
